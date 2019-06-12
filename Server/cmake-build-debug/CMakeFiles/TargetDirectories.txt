@@ -1,3 +1,0 @@
-D:/Cloud/Mijn projecten/Pi App Framework/Server/cmake-build-debug/CMakeFiles/Server.dir
-D:/Cloud/Mijn projecten/Pi App Framework/Server/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/Cloud/Mijn projecten/Pi App Framework/Server/cmake-build-debug/CMakeFiles/rebuild_cache.dir

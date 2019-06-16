@@ -12,16 +12,29 @@ apt-get dist-upgrade -y
 #install depency's
 sudo apt-get install -y php7.0 php7.0-mcrypt php7.0-mysql apache2
 
-#check if ssh is enabled, else ask to enable it
-SSH_EN=/boot/ssh
+#check if ssh is enabled/disabled, Ask for to either dis/enable ssh.
+SSH_EN=/etc/systemd/system/sshd.service
 if test -f "$FILE"; then
-    echo "SSH is already enabled"
+    echo -n "SSH is already enabled. Disable SSH? [y/n]"
+    read a1
+     if [ "$a1" != "${answer#[Yy]}" ] ;then
+        systemctl stop ssh
+        systemctl disable ssh
+        echo "SSH is disabled."
+    else
+        echo "SSH is enabled."
+    fi
 else
-    echo -n "Enable ssh? [y/n]
-    read answer
-    if [ "$answer" != "${answer#[Yy]}" ] ;then
+    echo -n "SSH is disabled. Enable ssh? [y/n]"
+    read a2
+    if [ "$a2" != "${answer#[Yy]}" ] ;then
+        systemctl enable ssh
+        systemctl start ssh
         echo "SSH Enabled"
     else
         echo "SSH is disabled."
     fi
 fi
+
+echo "Installation done, please reboot"
+#sudo reboot

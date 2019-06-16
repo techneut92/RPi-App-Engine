@@ -5,9 +5,12 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 #recreate install file
-rm ./Install.log.bckp
-mv ./Install.log ./Install.log.bckp
+rm ./Install.log.bckp >/dev/null 2>&1
+mv ./Install.log ./Install.log.bckp > /dev/null 2>&1
 touch ./Install.log
+
+set -e
+trap 'echo "\"${last_command}\" command filed with exit code $?. Aborting installation"' EXIT
 
 #Run the updates
 echo "Running apt-get update..."

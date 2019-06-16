@@ -10,7 +10,19 @@ mv ./Install.log ./Install.log.bckp > /dev/null 2>&1
 touch ./Install.log
 
 set -e
-trap 'echo "\"${last_command}\" command filed with exit code $?. Aborting installation"' EXIT
+function err_handler {
+if [ $? -ne 0 ] ;then
+    echo "An error has occured. Aborting installation. check Install.log for more info."
+else
+    #rm ./Install.log
+    echo -n "Installation completed. a reboot is required, reboot now? [y/n]: "
+    read a3
+    if [ "$a3" != "${a3#[Yy]}" ] ;then
+        reboot
+    fi
+fi
+}
+trap err_handler EXIT
 
 #Run the updates
 echo "Running apt-get update..."
@@ -29,7 +41,7 @@ SSH_EN=/etc/systemd/system/sshd.service
 if test -f "$SSH_EN"; then
     echo -n "SSH is already enabled. Disable SSH? [y/n]: "
     read a1
-     if [ "$a1" != "${a1#[Yy]}" ] ;then
+    if [ "$a1" != "${a1#[Yy]}" ] ;then
         systemctl stop ssh >./Install.log 2>&1
         systemctl disable ssh >./Install.log 2>&1
         echo "SSH is disabled..."
@@ -44,5 +56,3 @@ else
     fi
 fi
 
-echo "Installation done, please reboot"
-#sudo reboot

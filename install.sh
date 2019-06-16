@@ -23,7 +23,7 @@ SSH_EN=/etc/systemd/system/sshd.service
 if test -f "$SSH_EN"; then
     echo -n "SSH is already enabled. Disable SSH? [y/n]: "
     read a1
-     if [ "$a1" != "${answer#[Yy]}" ] ;then
+     if [ "$a1" != "${a1#[Yy]}" ] ;then
         systemctl stop ssh >./Install.log 2>&1
         systemctl disable ssh >./Install.log 2>&1
         echo "SSH is disabled."
@@ -33,7 +33,7 @@ if test -f "$SSH_EN"; then
 else
     echo -n "SSH is disabled. Enable ssh? [y/n]: "
     read a2
-    if [ "$a2" != "${answer#[Yy]}" ] ;then
+    if [ "$a2" != "${a2#[Yy]}" ] ;then
         systemctl enable ssh >./Install.log 2>&1
         systemctl start ssh >./Install.log 2>&1
         echo "SSH Enabled"

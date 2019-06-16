@@ -4,32 +4,38 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+#recreate install file
+rm ./Install.log.bckp
+mv ./Install.log ./Install.log.bckp
+touch ./Install.log
+
 #Run the updates
-apt-get update
-apt-get upgrade -y
-apt-get dist-upgrade -y
+apt-get update > ./Install.log 2>&1
+apt-get upgrade -y > /Install.log 2>&1
+apt-get dist-upgrade -y >/Install.log 2>&1
 
 #install depency's
-sudo apt-get install -y php7.0 php7.0-mcrypt php7.0-mysql apache2
+sudo apt-get install -y php7.0 php7.0-mcrypt php7.0-mysql \
+apache2 > ./Install.log 2>&1
 
 #check if ssh is enabled/disabled, Ask for to either dis/enable ssh.
 SSH_EN=/etc/systemd/system/sshd.service
-if test -f "$FILE"; then
-    echo -n "SSH is already enabled. Disable SSH? [y/n]"
+if test -f "$SSH_EN"; then
+    echo -n "SSH is already enabled. Disable SSH? [y/n]: "
     read a1
      if [ "$a1" != "${answer#[Yy]}" ] ;then
-        systemctl stop ssh
-        systemctl disable ssh
+        systemctl stop ssh >./Install.log 2>&1
+        systemctl disable ssh >./Install.log 2>&1
         echo "SSH is disabled."
     else
         echo "SSH is enabled."
     fi
 else
-    echo -n "SSH is disabled. Enable ssh? [y/n]"
+    echo -n "SSH is disabled. Enable ssh? [y/n]: "
     read a2
     if [ "$a2" != "${answer#[Yy]}" ] ;then
-        systemctl enable ssh
-        systemctl start ssh
+        systemctl enable ssh >./Install.log 2>&1
+        systemctl start ssh >./Install.log 2>&1
         echo "SSH Enabled"
     else
         echo "SSH is disabled."

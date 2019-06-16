@@ -10,13 +10,16 @@ mv ./Install.log ./Install.log.bckp
 touch ./Install.log
 
 #Run the updates
-apt-get update > ./Install.log 2>&1
-apt-get upgrade -y > /Install.log 2>&1
-apt-get dist-upgrade -y >/Install.log 2>&1
+echo "Running apt-get update..."
+apt-get update > ./Install.log
+echo "Running apt-get upgrade and dist-upgrade..."
+apt-get upgrade -y > /Install.log
+apt-get dist-upgrade -y >/Install.log
 
 #install depency's
+echo "Installing depency's..."
 sudo apt-get install -y php7.0 php7.0-mcrypt php7.0-mysql \
-apache2 > ./Install.log 2>&1
+apache2 > ./Install.log
 
 #check if ssh is enabled/disabled, Ask for to either dis/enable ssh.
 SSH_EN=/etc/systemd/system/sshd.service
@@ -26,9 +29,7 @@ if test -f "$SSH_EN"; then
      if [ "$a1" != "${a1#[Yy]}" ] ;then
         systemctl stop ssh >./Install.log 2>&1
         systemctl disable ssh >./Install.log 2>&1
-        echo "SSH is disabled."
-    else
-        echo "SSH is enabled."
+        echo "SSH is disabled..."
     fi
 else
     echo -n "SSH is disabled. Enable ssh? [y/n]: "
@@ -36,9 +37,7 @@ else
     if [ "$a2" != "${a2#[Yy]}" ] ;then
         systemctl enable ssh >./Install.log 2>&1
         systemctl start ssh >./Install.log 2>&1
-        echo "SSH Enabled"
-    else
-        echo "SSH is disabled."
+        echo "SSH Enabled..."
     fi
 fi
 

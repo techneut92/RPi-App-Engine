@@ -14,7 +14,7 @@ function err_handler {
 if [ $? -ne 0 ] ;then
     echo "An error has occured. Aborting installation. check Install.log for more info."
 else
-    #rm ./Install.log
+    rm ./Install.log ./Install.log.bckp
     echo -n "Installation completed. a reboot is required, reboot now? [y/n]: "
     read a3
     if [ "$a3" != "${a3#[Yy]}" ] ;then
@@ -56,3 +56,19 @@ else
     fi
 fi
 
+#generate ssl keypair for the server
+SSL_EN=./ssl/rpi-app-engine.crt
+if test -f "$SSL_EN"; then
+    echo "SSL keys already generated..."
+else
+    mkdir -p ./ssl
+    chown root:root ./ssl
+    chmod 700 ./ssl
+    echo -n "Generate SSL keys now (You can always do this later manually)? [y/n]: "
+    read a4
+    if [ "$a4" != "${a4#[Yy]}" ] ;then
+        echo "Generating ssl keypair for secure websocket connections. \nplease fill in the required settings..."
+        openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout ./ssl/rpi-app-engine.key -out ./ssl/rpi-app-engine.crt
+        chmod 600 ./ssl/*
+    fi
+fi

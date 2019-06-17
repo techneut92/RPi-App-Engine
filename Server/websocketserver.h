@@ -25,7 +25,7 @@ private Q_SLOTS:
 
 private:
     QWebSocketServer *websocketServer;
-    QList<QWebSocket *> clients;
+    QList<QWebSocket *> u_clients;
 
 signals:
 

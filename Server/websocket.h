@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QWebSocket>
 
-class Websocket : public QWebSocket
+class Websocket : public QObject
 {
     Q_OBJECT
 public:
-    explicit Websocket(QObject *parent = nullptr);
+    explicit Websocket(QWebSocket *cl, QObject *parent = nullptr);
+
+private:
+    QWebSocket *client;
 
 signals:
 

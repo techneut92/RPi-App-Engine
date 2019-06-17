@@ -1,6 +1,6 @@
 #include "websocket.h"
 
-Websocket::Websocket(QObject *parent) : QWebSocket()
+Websocket::Websocket(QWebSocket *cl, QObject *parent) : QObject(parent)
 {
-
+    this->client = cl;
 }

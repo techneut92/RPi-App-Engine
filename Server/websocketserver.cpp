@@ -6,6 +6,7 @@
 #include <QtNetwork/QSslKey>
 #include <QSettings>
 #include <QDebug>
+#include "websocket.h"
 
 WebsocketServer::WebsocketServer(QObject *parent) :
     QObject(parent),
@@ -44,7 +45,7 @@ WebsocketServer::WebsocketServer(QObject *parent) :
 WebsocketServer::~WebsocketServer()
 {
     websocketServer->close();
-    qDeleteAll(clients.begin(), clients.end());
+    qDeleteAll(u_clients.begin(), u_clients.end());
 }
 
 void WebsocketServer::onNewConnection()
@@ -58,25 +59,27 @@ void WebsocketServer::onNewConnection()
             this, &WebsocketServer::processBinaryMessage);
     connect(pSocket, &QWebSocket::disconnected, this, &WebsocketServer::socketDisconnected);
 
-    clients << pSocket;
+    u_clients << pSocket;
+
 }
 
 void WebsocketServer::processTextMessage(QString message)
 {
-
+    qDebug() << message;
 }
 
 void WebsocketServer::processBinaryMessage(QByteArray message)
 {
-
+    qDebug() << message;
 }
 
 void WebsocketServer::socketDisconnected()
 {
-
+    qDebug() << "disconnected";
 }
 
 void WebsocketServer::onSslErrors(const QList<QSslError> &errors)
 {
     qDebug() << "SSL error occured";
+    Q_UNUSED(errors)
 }

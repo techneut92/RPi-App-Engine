@@ -117,8 +117,8 @@ make -j 8 ./Server/ > ./Install.log
 
 #install websocket server
 echo "Installing websocket server..."
-touch ./usr/bin/rpae-server
-rm ./usr/bin/rpae-server
+touch /usr/bin/rpae-server
+rm /usr/bin/rpae-server
 ln -s ./Server/Server /usr/bin/rpae-server > ./Install.log
 mkdir -p /etc/rpae/server > ./Install.log
 cp ./Server/server.ini /etc/rpae/server/ > ./Install.log

@@ -54,6 +54,7 @@ SSL_EN=/etc/rpae/ssl/rpi-app-engine.crt
 SSL_ENABLED="FALSE"
 if test -f "$SSL_EN"; then
     echo "SSL keys already generated..."
+    SSL_ENABLED="TRUE"
 else
     echo -n "Generate self-signed SSL keys now (You can always do this later manually)? [y/n]: "
     read a4
@@ -147,6 +148,9 @@ fi
 if [ "$SSL_ENABLED" == "TRUE" ]; then
     echo "Setting up apache2 with SSL..."
     a2enmod ssl
+    if test -f "./Install/rpae.conf"; then
+        cp ./Install/rpae.conf /etc/apache2/sites-available/
+    fi
 fi
 
 ######## TODO SET UP RPAE-CLI ########

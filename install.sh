@@ -51,12 +51,14 @@ fi
 
 # TODO ask SSL self-signed keys
 SSL_EN=/etc/rpae/ssl/rpi-app-engine.crt
+SSL_ENABLED="FALSE"
 if test -f "$SSL_EN"; then
     echo "SSL keys already generated..."
 else
     echo -n "Generate self-signed SSL keys now (You can always do this later manually)? [y/n]: "
     read a4
     if [ "$a4" != "${a4#[Yy]}" ] ;then
+        SSL_ENABLED="TRUE"
         echo "Generating ssl keypair for secure websocket connections. \nplease fill in the required settings..."
         openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/rpae/ssl/rpi-app-engine.key -out /etc/rpae/ssl/rpi-app-engine.crt
         chmod 600 /etc/rpae/ssl/*
@@ -142,6 +144,10 @@ fi
 ######## TODO INSTALL SERVER APPS ########
 
 ######## TODO SET UP APACHE2 SSL ########
+if [ "$SSL_ENABLED" == "TRUE" ]; then
+    echo "Setting up apache2 with SSL..."
+    a2enmod ssl
+fi
 
 ######## TODO SET UP RPAE-CLI ########
 

@@ -13,24 +13,24 @@ WebsocketServer::WebsocketServer(QObject *parent) :
     websocketServer(nullptr)
 {
     websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
-                                                  QWebSocketServer::SecureMode,
+                                                  QWebSocketServer::NonSecureMode,
                                                   this);
-    QSettings settings("/etc/rpae/server.ini", QSettings::IniFormat);  // TODO CHANGE TO /etc/rpae
-    QSslConfiguration sslConfiguration;
+    QSettings settings("C:\\Users\\dylan\\Documents\\Server\\server.ini", QSettings::IniFormat);  // TODO CHANGE TO /etc/rpae
+    //QSslConfiguration sslConfiguration;
     quint16 port = settings.value("websocket_server/port", "").toString().toUShort();
-    QFile certFile(settings.value("websocket_server/ssl_cert", "").toString());
-    QFile keyFile(settings.value("websocket_server/ssl_key", "").toString());
-    certFile.open(QIODevice::ReadOnly);
-    keyFile.open(QIODevice::ReadOnly);
-    QSslCertificate certificate(&certFile, QSsl::Pem);
-    QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
-    certFile.close();
-    keyFile.close();
-    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
-    sslConfiguration.setLocalCertificate(certificate);
-    sslConfiguration.setPrivateKey(sslKey);
-    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
-    websocketServer->setSslConfiguration(sslConfiguration);
+    //QFile certFile(settings.value("websocket_server/ssl_cert", "").toString());
+    //QFile keyFile(settings.value("websocket_server/ssl_key", "").toString());
+    //certFile.open(QIODevice::ReadOnly);
+    //keyFile.open(QIODevice::ReadOnly);
+    //QSslCertificate certificate(&certFile, QSsl::Pem);
+    //QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+    //certFile.close();
+    //keyFile.close();
+    //sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    //sslConfiguration.setLocalCertificate(certificate);
+    //sslConfiguration.setPrivateKey(sslKey);
+    //sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
+    //websocketServer->setSslConfiguration(sslConfiguration);
 
     if (websocketServer->listen(QHostAddress::Any, port))
         {

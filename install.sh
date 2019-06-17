@@ -117,9 +117,11 @@ make -j 8 ./Server/ > ./Install.log
 
 #install websocket server
 echo "Installing websocket server..."
-touch /usr/bin/rpae-server
-rm /usr/bin/rpae-server
-ln -s ./Server/Server /usr/bin/rpae-server > ./Install.log
+SL=/usr/bin/rpae-server
+if test -L "$SL"; then
+    rm -f /usr/bin/rpae-server
+fi
+ln -s "$(pwd)/Server/Server" /usr/bin/rpae-server > ./Install.log
 mkdir -p /etc/rpae/server > ./Install.log
 cp ./Server/server.ini /etc/rpae/server/ > ./Install.log
 
@@ -127,7 +129,9 @@ cp ./Server/server.ini /etc/rpae/server/ > ./Install.log
 echo "Creating Server service..."
 
 ######## TODO SET BOOTUP TO OPENBOX AND AUTO OPEN IN FULLSCREEN CHROMIUM #######
-
+if [ "$OBOX_FULL" == "TRUE" ];then
+    echo "Installing openbox..."
+fi
 ######## TODO SET UNCLUTTER #########
 
 ######## TODO INSTALL WEBCLIENT ########

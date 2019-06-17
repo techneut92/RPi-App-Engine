@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
+        websocket.cpp \
         websocketserver.cpp
 
 # Default rules for deployment.
@@ -25,6 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    websocket.h \
     websocketserver.h
 
 DISTFILES += \

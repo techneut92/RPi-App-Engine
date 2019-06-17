@@ -14,11 +14,11 @@ WebsocketServer::WebsocketServer(QObject *parent) :
     websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
                                                   QWebSocketServer::SecureMode,
                                                   this);
-    QSettings settings(QString("server.ini"), QSettings::IniFormat);
+    QSettings settings("C:\\Users\\dylan\\Documents\\Server\\server.ini", QSettings::IniFormat);  // TODO CHANGE TO /etc/rpae
     QSslConfiguration sslConfiguration;
-    quint16 port = quint16(settings.value("websocket server/ssl_key", "").toInt());
-    QFile certFile(settings.value("websocket server/ssl_cert", "").toString());
-    QFile keyFile(settings.value("websocket server/ssl_key", "").toString());
+    quint16 port = settings.value("websocket_server/port", "").toString().toUShort();
+    QFile certFile(settings.value("websocket_server/ssl_cert", "").toString());
+    QFile keyFile(settings.value("websocket_server/ssl_key", "").toString());
     certFile.open(QIODevice::ReadOnly);
     keyFile.open(QIODevice::ReadOnly);
     QSslCertificate certificate(&certFile, QSsl::Pem);
@@ -33,7 +33,7 @@ WebsocketServer::WebsocketServer(QObject *parent) :
 
     if (websocketServer->listen(QHostAddress::Any, port))
         {
-            qDebug() << "Raspberry Pi App Engine server running on port " << port;
+            qDebug() << "Raspberry Pi App Engine server running on port" << port;
             connect(websocketServer, &QWebSocketServer::newConnection,
                     this, &WebsocketServer::onNewConnection);
             connect(websocketServer, &QWebSocketServer::sslErrors,
@@ -49,7 +49,16 @@ WebsocketServer::~WebsocketServer()
 
 void WebsocketServer::onNewConnection()
 {
+    QWebSocket *pSocket = websocketServer->nextPendingConnection();
 
+    qDebug() << "Client connected:" << pSocket->peerName() << pSocket->origin();
+
+    connect(pSocket, &QWebSocket::textMessageReceived, this, &WebsocketServer::processTextMessage);
+    connect(pSocket, &QWebSocket::binaryMessageReceived,
+            this, &WebsocketServer::processBinaryMessage);
+    connect(pSocket, &QWebSocket::disconnected, this, &WebsocketServer::socketDisconnected);
+
+    clients << pSocket;
 }
 
 void WebsocketServer::processTextMessage(QString message)
@@ -69,5 +78,5 @@ void WebsocketServer::socketDisconnected()
 
 void WebsocketServer::onSslErrors(const QList<QSslError> &errors)
 {
-
+    qDebug() << "SSL error occured";
 }

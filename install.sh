@@ -73,6 +73,14 @@ else
     OBOX_FULL = "FALSE"
 
 # TODO ask unclutter
+echo "Unclutter is a program that removes the mouse from the screen for usage with touch screens."
+echo -n "Do you wish to install unclutter? [y/n]: "
+read unc
+if [ "$unc" != "${a4#[Yy]}" ]; then
+    UNCLUTTER = "TRUE"
+else
+    UNCLUTTER = "FALSE"
+
 
 #Run the updates
 echo "Running apt-get update..."

@@ -12,25 +12,34 @@ WebsocketServer::WebsocketServer(QObject *parent) :
     QObject(parent),
     websocketServer(nullptr)
 {
-    websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
-                                                  QWebSocketServer::NonSecureMode,
-                                                  this);
-    QSettings settings("/etc/rpae/server.ini", QSettings::IniFormat);  // TODO CHANGE TO /etc/rpae
-    //QSslConfiguration sslConfiguration;
-    quint16 port = settings.value("websocket_server/port", "").toString().toUShort();
-    //QFile certFile(settings.value("websocket_server/ssl_cert", "").toString());
-    //QFile keyFile(settings.value("websocket_server/ssl_key", "").toString());
-    //certFile.open(QIODevice::ReadOnly);
-    //keyFile.open(QIODevice::ReadOnly);
-    //QSslCertificate certificate(&certFile, QSsl::Pem);
-    //QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
-    //certFile.close();
-    //keyFile.close();
-    //sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
-    //sslConfiguration.setLocalCertificate(certificate);
-    //sslConfiguration.setPrivateKey(sslKey);
-    //sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
-    //websocketServer->setSslConfiguration(sslConfiguration);
+    QSettings settings("/etc/rpae/server/server.ini", QSettings::IniFormat);  // TODO CHANGE TO /etc/rpae
+    if (settings.value("websocket_server/ssl_key", "").toString() == "true"){
+        this->websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
+                                                     QWebSocketServer::SecureMode,
+                                                     this);
+        QSslConfiguration sslConfiguration;
+        QFile certFile(settings.value("websocket_server/ssl_cert", "").toString());
+        QFile keyFile(settings.value("websocket_server/ssl_key", "").toString());
+        certFile.open(QIODevice::ReadOnly);
+        keyFile.open(QIODevice::ReadOnly);
+        QSslCertificate certificate(&certFile, QSsl::Pem);
+        QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+        certFile.close();
+        keyFile.close();
+        sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+        sslConfiguration.setLocalCertificate(certificate);
+        sslConfiguration.setPrivateKey(sslKey);
+        sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
+        websocketServer->setSslConfiguration(sslConfiguration);
+    }
+    else {
+        this->websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
+                                                 QWebSocketServer::NonSecureMode,
+                                                 this);
+    }
+
+    quint16 port = 9738; //settings.value("websocket_server/port", "").toString().toUShort();
+
 
     if (websocketServer->listen(QHostAddress::Any, port))
         {

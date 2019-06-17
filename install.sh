@@ -9,9 +9,9 @@ rm ./Install.log.bckp >/dev/null 2>&1
 mv ./Install.log ./Install.log.bckp > /dev/null 2>&1
 touch ./Install.log
 mkdir -p /etc/rpae
-mkdir -p /etc/rpae/ssl
-chown root:root /etc/rpae/ssl
-chmod 700 /etc/rpae/ssl
+#mkdir -p /etc/rpae/ssl
+#chown root:root /etc/rpae/ssl
+#chmod 700 /etc/rpae/ssl
 mkdir -p /etc/rpae/server
 
 set -e
@@ -50,21 +50,21 @@ else
 fi
 
 # TODO ask SSL self-signed keys
-SSL_EN=/etc/rpae/ssl/rpi-app-engine.crt
-SSL_ENABLED="FALSE"
-if test -f "$SSL_EN"; then
-    echo "SSL keys already generated..."
-    SSL_ENABLED="TRUE"
-else
-    echo -n "Generate self-signed SSL keys now (You can always do this later manually)? [y/n]: "
-    read a4
-    if [ "$a4" != "${a4#[Yy]}" ] ;then
-        SSL_ENABLED="TRUE"
-        echo "Generating ssl keypair for secure websocket connections. \nplease fill in the required settings..."
-        openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/rpae/ssl/rpi-app-engine.key -out /etc/rpae/ssl/rpi-app-engine.crt
-        chmod 600 /etc/rpae/ssl/*
-    fi
-fi
+#SSL_EN=/etc/rpae/ssl/rpi-app-engine.crt
+#SSL_ENABLED="FALSE"
+#if test -f "$SSL_EN"; then
+#    echo "SSL keys already generated..."
+#    SSL_ENABLED="TRUE"
+#else
+#    echo -n "Generate self-signed SSL keys now (You can always do this later manually)? [y/n]: "
+#    read a4
+#    if [ "$a4" != "${a4#[Yy]}" ] ;then
+#        SSL_ENABLED="TRUE"
+#        echo "Generating ssl keypair for secure websocket connections. \nplease fill in the required settings..."
+#        openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/rpae/ssl/rpi-app-engine.key -out /etc/rpae/ssl/rpi-app-engine.crt
+#        chmod 600 /etc/rpae/ssl/*
+#    fi
+#fi
 
 # TODO ask openbox full screen chromium
 OBOX_FULL="null"
@@ -145,13 +145,14 @@ fi
 ######## TODO INSTALL SERVER APPS ########
 
 ######## TODO SET UP APACHE2 SSL ########
-if [ "$SSL_ENABLED" == "TRUE" ]; then
-    echo "Setting up apache2 with SSL..."
-    a2enmod ssl
-    if test -f "./Install/rpae.conf"; then
-        cp ./Install/rpae.conf /etc/apache2/sites-available/
-    fi
-fi
+#if [ "$SSL_ENABLED" == "TRUE" ]; then
+#    echo "Setting up apache2 with SSL..."
+#    a2enmod ssl > Install.log
+#    systemctl restart apache2 > Install.log
+#    if test -f "./Install/rpae.conf"; then
+#        cp ./Install/rpae.conf /etc/apache2/sites-available/
+#    fi
+#fi
 
 ######## TODO SET UP RPAE-CLI ########
 

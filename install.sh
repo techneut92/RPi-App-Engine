@@ -19,10 +19,10 @@ function err_handler {
 if [ $? -ne 0 ] ;then
     echo "An error has occured. Aborting installation. check Install.log for more info."
 else
-    rm ./Install.log ./Install.log.bckp
+    rm ./Install.log ./Install.log.bckp > ./Install.log 2>&1
     echo -n "Installation completed. a reboot is required, reboot now? [y/n]: "
-    read a3
-    if [ "$a3" != "${a3#[Yy]}" ] ;then
+    read rb
+    if [ "$rb" != "${rb#[Yy]}" ] ;then
         reboot
     fi
 fi
@@ -64,23 +64,26 @@ else
 fi
 
 # TODO ask openbox full screen chromium
-echo "If you only run the webclient and nothing else on this raspberry pi it's a \ngood practice to set up openbox with the rpae GUI full screen. If you\nstill wish to use other apps it's best to select 'n'"
+OBOX_FULL="null"
+echo "If you only run the webclient and nothing else on this raspberry pi it's a good practice to set up openbox with the rpae GUI full screen. If you still wish to use other apps it's best to select 'n'"
 echo -n "Do you wish to install openbox with the full screen rpae GUI? [y/n]: "
 read ofs
-if [ "$ofs" != "${a4#[Yy]}" ]; then
-    OBOX_FULL = "TRUE"
+if [ "$ofs" != "${ofs#[Yy]}" ]; then
+    OBOX_FULL="TRUE"
 else
-    OBOX_FULL = "FALSE"
+    OBOX_FULL="FALSE"
+fi
 
 # TODO ask unclutter
+UNCLUTTER="null"
 echo "Unclutter is a program that removes the mouse from the screen for usage with touch screens."
 echo -n "Do you wish to install unclutter? [y/n]: "
 read unc
-if [ "$unc" != "${a4#[Yy]}" ]; then
-    UNCLUTTER = "TRUE"
+if [ "$unc" != "${unc#[Yy]}" ]; then
+    UNCLUTTER="TRUE"
 else
-    UNCLUTTER = "FALSE"
-
+    UNCLUTTER="FALSE"
+fi
 
 #Run the updates
 echo "Running apt-get update..."
@@ -114,6 +117,8 @@ make -j 8 ./Server/ > ./Install.log
 
 #install websocket server
 echo "Installing websocket server..."
+touch ./usr/bin/rpae-server
+rm ./usr/bin/rpae-server
 ln -s ./Server/Server /usr/bin/rpae-server > ./Install.log
 mkdir -p /etc/rpae/server > ./Install.log
 cp ./Server/server.ini /etc/rpae/server/ > ./Install.log

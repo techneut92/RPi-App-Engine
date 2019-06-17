@@ -111,9 +111,12 @@ if [ "$SSH_ENABLED" == "TRUE" ] ;then
 fi
 
 #compile websocket server
+OLD_DIR="$(pwd)"
+cd Server
 echo "Compiling websocket server....."
-qmake ./Server/Server.pro >./Install.log
-make -j 8 ./Server/ > ./Install.log
+qmake ./Server.pro >./Install.log
+make -j 8 > ./Install.log
+cd "$OLD_DIR"
 
 #install websocket server
 echo "Installing websocket server..."

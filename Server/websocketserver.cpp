@@ -6,7 +6,6 @@
 #include <QtNetwork/QSslKey>
 #include <QSettings>
 #include <QDebug>
-#include "client.h"
 
 WebsocketServer::WebsocketServer(MsgDistributor *ms, QObject *parent) :
     QObject(parent),
@@ -14,7 +13,7 @@ WebsocketServer::WebsocketServer(MsgDistributor *ms, QObject *parent) :
 {
     this->msg_dist = ms;
     QSettings settings("/etc/rpae/server/server.ini", QSettings::IniFormat);
-    quint16 port = 9738; //settings.value("websocket_server/port", "").toString().toUShort(); //TODO REPLACE
+    quint16 port = settings.value("websocket_server/port", "").toString().toUShort(); //TODO REPLACE
     if (settings.value("websocket_server/ssl_enabled", "").toString() == "true"){
         this->websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
                                                      QWebSocketServer::SecureMode,
@@ -42,9 +41,14 @@ WebsocketServer::WebsocketServer(MsgDistributor *ms, QObject *parent) :
 
     if (websocketServer->listen(QHostAddress::Any, port))
         {
+        connect(websocketServer, &QWebSocketServer::newConnection,
+                 this, &WebsocketServer::onNewConnection);
+
+        if(this->websocketServer->secureMode() == QWebSocketServer::NonSecureMode){
             qDebug() << "Raspberry Pi App Engine server running on port" << port;
-            connect(websocketServer, &QWebSocketServer::newConnection,
-                    this, &WebsocketServer::onNewConnection);
+        }
+        else if (this->websocketServer->secureMode() == QWebSocketServer::SecureMode)
+            qDebug() << "Raspberry Pi App Engine server running on port" << port << "With SSL Enabled.";
             connect(websocketServer, &QWebSocketServer::sslErrors,
                     this, &WebsocketServer::onSslErrors);
         }

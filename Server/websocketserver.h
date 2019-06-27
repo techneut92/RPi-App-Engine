@@ -6,6 +6,7 @@
 #include <QtCore/QByteArray>
 #include <QtNetwork/QSslError>
 #include "msgdistributor.h"
+#include "client.h"
 
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)

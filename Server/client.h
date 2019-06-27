@@ -13,7 +13,7 @@ class Client : public QObject
     Q_OBJECT
 public:
     explicit Client(QWebSocket *cl, QObject *parent = nullptr);
-    explicit Client(QTcpSocket *cl, QObject *parent);
+    //explicit Client(QTcpSocket *cl, QObject *parent);
     ~Client() override;
     ClientType type;
 

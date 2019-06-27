@@ -6,14 +6,16 @@
 #include <QtNetwork/QSslKey>
 #include <QSettings>
 #include <QDebug>
-#include "websocket.h"
+#include "client.h"
 
-WebsocketServer::WebsocketServer(QObject *parent) :
+WebsocketServer::WebsocketServer(MsgDistributor *ms, QObject *parent) :
     QObject(parent),
     websocketServer(nullptr)
 {
-    QSettings settings("/etc/rpae/server/server.ini", QSettings::IniFormat);  // TODO CHANGE TO /etc/rpae
-    if (settings.value("websocket_server/ssl_key", "").toString() == "true"){
+    this->msg_dist = ms;
+    QSettings settings("/etc/rpae/server/server.ini", QSettings::IniFormat);
+    quint16 port = 9738; //settings.value("websocket_server/port", "").toString().toUShort(); //TODO REPLACE
+    if (settings.value("websocket_server/ssl_enabled", "").toString() == "true"){
         this->websocketServer = new QWebSocketServer(QStringLiteral("Raspberry pi App Engine message distributor"),
                                                      QWebSocketServer::SecureMode,
                                                      this);
@@ -38,9 +40,6 @@ WebsocketServer::WebsocketServer(QObject *parent) :
                                                  this);
     }
 
-    quint16 port = 9738; //settings.value("websocket_server/port", "").toString().toUShort();
-
-
     if (websocketServer->listen(QHostAddress::Any, port))
         {
             qDebug() << "Raspberry Pi App Engine server running on port" << port;
@@ -53,8 +52,9 @@ WebsocketServer::WebsocketServer(QObject *parent) :
 
 WebsocketServer::~WebsocketServer()
 {
+    qDebug() << "Closing and cleaning up the websocketserver...";
     websocketServer->close();
-    qDeleteAll(u_clients.begin(), u_clients.end());
+    this->msg_dist = nullptr;
 }
 
 void WebsocketServer::onNewConnection()
@@ -63,28 +63,7 @@ void WebsocketServer::onNewConnection()
 
     qDebug() << "Client connected:" << pSocket->peerName() << pSocket->origin();
 
-    connect(pSocket, &QWebSocket::textMessageReceived, this, &WebsocketServer::processTextMessage);
-    connect(pSocket, &QWebSocket::binaryMessageReceived,
-            this, &WebsocketServer::processBinaryMessage);
-    connect(pSocket, &QWebSocket::disconnected, this, &WebsocketServer::socketDisconnected);
-
-    u_clients << pSocket;
-
-}
-
-void WebsocketServer::processTextMessage(QString message)
-{
-    qDebug() << message;
-}
-
-void WebsocketServer::processBinaryMessage(QByteArray message)
-{
-    qDebug() << message;
-}
-
-void WebsocketServer::socketDisconnected()
-{
-    qDebug() << "disconnected";
+    this->msg_dist->AppendClient(new Client(pSocket));
 }
 
 void WebsocketServer::onSslErrors(const QList<QSslError> &errors)

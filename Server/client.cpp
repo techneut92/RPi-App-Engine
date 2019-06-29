@@ -3,23 +3,17 @@
 
 Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 {
-    this->ws_client = cl;
-    this->con_type = ConnectionType::WebSocket;
-    // make connections first
+    this->ws_client = cl;   // save the connection in this variable
+    this->con_type = ConnectionType::WebSocket; // set the connection type
+    // make connections first. This is set before the handshake can occur.
     connect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::handshake);
     connect(this->ws_client, &QWebSocket::binaryMessageReceived,
             this, &Client::falseHandshake);
     connect(this->ws_client, &QWebSocket::disconnected, this, &Client::socketDisconnected);
 
-    // ask for the ID
+    // ask the client to do an handshake
     cl->sendTextMessage(QString("HANDSHAKE"));
 }
-
-//Client::Client(QTcpSocket *cl, QObject *parent) : QObject(parent)
-//{
-    //this->tcp_client = cl;
-    //this->Type = ClientType::TcpSocket;
-//}
 
 Client::~Client()
 {
@@ -31,14 +25,22 @@ QString Client::getId() const
     return id;
 }
 
+bool Client::awaiting_handshake()
+{
+    if (this->handshake_succes) return false;
+    else return true;
+}
+
 void Client::processTextMessage(QString message)
 {
     qDebug() << message;
+    emit sendTextMessage(message, this->id, this->app_type);
 }
 
 void Client::processBinaryMessage(QByteArray message)
 {
     qDebug() << message;
+    emit sendBinaryMessage(message, this->id, this->app_type);
 }
 
 void Client::socketDisconnected()
@@ -48,22 +50,26 @@ void Client::socketDisconnected()
 
 void Client::handshake(QString message)
 {
-    bool handshake_succes = false;
-    // process handshake data
-    qDebug() << message;
 
-    if (handshake_succes){
-        // disconnect previous signals
+    // process handshake data
+    qDebug() << "Handshake started: " << message;
+    // decode json or whatever format I decide to use
+    // set id and apptype
+    // set handshake_succes to true
+
+    if (this->handshake_succes){
+        // disconnect previous signals as we don't need to use the handshake anymore.
         disconnect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::handshake);
         disconnect(this->ws_client, &QWebSocket::binaryMessageReceived,
                 this, &Client::falseHandshake);
-        // reconnect the signals
+        // reconnect the signals to the functions to handle msg distribution
         connect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::processTextMessage);
         connect(this->ws_client, &QWebSocket::binaryMessageReceived,
                 this, &Client::processBinaryMessage);
         this->ws_client->sendTextMessage("HANDSHAKE_SUCCES");
+        emit handshake_succesful(this);
     }else{
-        this->ws_client->sendTextMessage("HANDSHAKE_FAILURE");
+        this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message); // TODO add error
     }
 }
 
@@ -71,5 +77,5 @@ void Client::falseHandshake(QByteArray message)
 {
     qDebug() << "Data received as bytearray while awaiting handshake...";
     qDebug() << message;
-    this->ws_client->sendTextMessage("HANDSHAKE_FAILURE");
+    this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: Data received as byte array.");
 }

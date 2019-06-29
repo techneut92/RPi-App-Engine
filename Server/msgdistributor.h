@@ -13,7 +13,11 @@ public:
     void AppendClient(Client *c);
 
 private:
-    QList<Client *> clients;
+    QList<Client *> u_clients; // clients awaiting handshake
+    QList<Client *> c_clients; // clients connected
+
+private Q_SLOTS:
+    void connectApp(Client *c);
 
 signals:
 

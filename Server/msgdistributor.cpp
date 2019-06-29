@@ -16,6 +16,7 @@ void MsgDistributor::AppendClient(Client *c)
 {
     this->u_clients << c;
     connect(c, &Client::handshake_succesful, this, &MsgDistributor::connectApp);
+    connect(c, &Client::disconnected, this, &MsgDistributor::onDisconnect);
 }
 
 /* function is a slot connected with the signal from Client::handshake()
@@ -32,11 +33,24 @@ void MsgDistributor::connectApp(Client *c)
     //connect(c, &Client::textMessageReceived, this, &MsgDistributor::processTextMessages);
 
     qDebug() << c->getId() << c->appType() << "Ready to process data";
+    // TODO MAKE SURE DATA IS INTERCEPTED SO NONE IS LOST.
     Q_UNUSED(c);
 }
 
 void MsgDistributor::processTextMessages(QString message, QString id, AppType apptype)
 {
     qDebug() << message << id << apptype;
+}
+
+// TODO FIX
+void MsgDistributor::onDisconnect(Client *c)
+{
+    if (c->awaiting_handshake()){
+
+    }else{
+
+    }
+    delete c;
+    qDebug() << "not handling the disconnect atm...";
 }
 

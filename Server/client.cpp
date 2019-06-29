@@ -65,16 +65,24 @@ void Client::processBinaryMessage(QByteArray message)
 void Client::socketDisconnected()
 {
     qDebug() << "disconnected";
+    this->ws_client->close();
+    delete this->ws_client;
+    emit disconnected(this);
 }
 
 // handshake function catches all first messages from the app.
 // the first data should contain the app id and the type of app.
 void Client::handshake(QString message)
 {
-
     // process handshake data
     qDebug() << "Handshake started:" << message;
-    // decode json or whatever format I decide to use
+    QJsonDocument doc;
+    QByteArray jsondata;
+    jsondata.append(message);
+    doc.fromJson(jsondata);
+    QJsonObject jsonObject = doc.object();
+    QVariantMap jsonMap = jsonObject.toVariantMap();
+    qDebug() << jsonMap["id"] << jsonMap["appType"];
     // set id and apptype
     // set handshake_succes to true
 

@@ -10,7 +10,7 @@ class MsgDistributor : public QObject
 public:
     explicit MsgDistributor(QObject *parent = nullptr);
     ~MsgDistributor() override;
-    void AppendClient(Client *c);
+    void AppendClient(Client *c);               // append newly connected client
 
 private:
     QList<Client *> u_clients;                  // clients awaiting handshake
@@ -18,8 +18,9 @@ private:
     QMap<QString, QList<Client*>> cc_clients;   // clients connected in a qmap for easy access
 
 private Q_SLOTS:
-    void connectApp(Client *c);
+    void connectApp(Client *c);                 // connects app to
     void processTextMessages(QString message, QString id, AppType apptype);
+    void onDisconnect(Client *c);
 
 signals:
 

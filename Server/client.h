@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QWebSocket>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 /* This class contain the websocket connection and handles those.
  * any message will be send to the msg distributor and will be transfered there
@@ -30,6 +32,7 @@ public:
     bool awaiting_handshake();                      // returns the opposite of handshake_succes
     AppType appType();                              // get function for app_type
     ConnectionType connectionType();                // get function for con_type
+    //int uid;                                        // unique id given by msg distributor
 
 private:
     QString id;                                     // Contains the app ID.
@@ -49,6 +52,7 @@ signals:
     void handshake_succesful(Client *c);                                             // Signal to send when the handshake was succesful sending this client as an object
     void textMessageReceived(QString message, QString id, AppType apptype);          // Signal to send any received text messages
     void binaryMessageReceived(QByteArray message, QString id, AppType apptype);     // Signal to send any received binary messages
+    void disconnected(Client *c);                                                    // Signal when client disconnects
 
 public slots:
 };

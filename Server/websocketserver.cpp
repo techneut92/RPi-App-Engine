@@ -45,10 +45,10 @@ WebsocketServer::WebsocketServer(MsgDistributor *ms, QObject *parent) :
                  this, &WebsocketServer::onNewConnection);
 
         if(this->websocketServer->secureMode() == QWebSocketServer::NonSecureMode){
-            qDebug() << "Raspberry Pi App Engine server running on port" << port;
+            qDebug() << "Websocket server running on port" << port;
         }
         else if (this->websocketServer->secureMode() == QWebSocketServer::SecureMode)
-            qDebug() << "Raspberry Pi App Engine server running on port" << port << "With SSL Enabled.";
+            qDebug() << "Websocket server running on port" << port << "With SSL Enabled.";
             connect(websocketServer, &QWebSocketServer::sslErrors,
                     this, &WebsocketServer::onSslErrors);
         }
@@ -65,7 +65,7 @@ void WebsocketServer::onNewConnection()
 {
     QWebSocket *pSocket = websocketServer->nextPendingConnection();
 
-    qDebug() << "Client connected:" << pSocket->peerName() << pSocket->origin();
+    qDebug() << "Client connected:" << pSocket->peerAddress() << pSocket->origin();
 
     this->msg_dist->AppendClient(new Client(pSocket));
 }

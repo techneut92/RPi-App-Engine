@@ -25,16 +25,18 @@ class Client : public QObject
 public:
     explicit Client(QWebSocket *cl, QObject *parent = nullptr);
     ~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
-    ConnectionType con_type;                        // currently always set to websocket, is there in case of expansion to tcp connections.
-    AppType app_type = UnkownType;                  // Will contain the apptype if it's either a client or server type.
 
     QString getId() const;                          // Get function for the app id
     bool awaiting_handshake();                      // returns the opposite of handshake_succes
+    AppType appType();                              // get function for app_type
+    ConnectionType connectionType();                // get function for con_type
 
 private:
     QString id;                                     // Contains the app ID.
     QWebSocket *ws_client;                          // Contains the websocket connection.
     bool handshake_succes = false;                  // Registers if the handshake was done succesfully.
+    ConnectionType con_type;                        // currently always set to websocket, is there in case of expansion to tcp connections.
+    AppType app_type = UnkownType;                  // Will contain the apptype if it's either a client or server type.
 
 private Q_SLOTS:
     void processTextMessage(QString message);       // Captures text messages from the websocket
@@ -44,9 +46,9 @@ private Q_SLOTS:
     void falseHandshake(QByteArray message);        // Function to capture binary data before the handshake occured
 
 signals:
-    void handshake_succesful(Client *c);                        // Signal to send when the handshake was succesful sending this client as an object
-    void sendTextMessage(QString message, QString id, AppType apptype);          // Signal to send any received text messages
-    void sendBinaryMessage(QByteArray message, QString id, AppType apptype);     // Signal to send any received binary messages
+    void handshake_succesful(Client *c);                                             // Signal to send when the handshake was succesful sending this client as an object
+    void textMessageReceived(QString message, QString id, AppType apptype);          // Signal to send any received text messages
+    void binaryMessageReceived(QByteArray message, QString id, AppType apptype);     // Signal to send any received binary messages
 
 public slots:
 };

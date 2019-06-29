@@ -3,8 +3,9 @@
 
 Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 {
-    this->ws_client = cl;   // save the connection in this variable
+    this->ws_client = cl;                       // save the connection in this variable
     this->con_type = ConnectionType::WebSocket; // set the connection type
+
     // make connections first. This is set before the handshake can occur.
     connect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::handshake);
     connect(this->ws_client, &QWebSocket::binaryMessageReceived,
@@ -15,44 +16,64 @@ Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
     cl->sendTextMessage(QString("HANDSHAKE"));
 }
 
+// destructor makes sure the connection is closed and deleted.
 Client::~Client()
 {
+    this->ws_client->close();
     this->ws_client = nullptr;
 }
 
+// getter for id
 QString Client::getId() const
 {
     return id;
 }
 
+// returns if the handshake has occured as a bool
 bool Client::awaiting_handshake()
 {
     if (this->handshake_succes) return false;
     else return true;
 }
 
+// returns apptype
+AppType Client::appType()
+{
+    return this->app_type;
+}
+
+// return connection type
+ConnectionType Client::connectionType()
+{
+    return this->con_type;
+}
+
+// Messages are handled in the msg distributor, as such it will be directly emitted.
 void Client::processTextMessage(QString message)
 {
     qDebug() << message;
-    emit sendTextMessage(message, this->id, this->app_type);
+    emit textMessageReceived(message, this->id, this->app_type);
 }
 
 void Client::processBinaryMessage(QByteArray message)
 {
     qDebug() << message;
-    emit sendBinaryMessage(message, this->id, this->app_type);
+    emit binaryMessageReceived(message, this->id, this->app_type);
 }
 
+// TODO HANDLE DISCONNECTS
 void Client::socketDisconnected()
 {
     qDebug() << "disconnected";
 }
 
+// handshake function catches all first messages from the app.
+// the first data should contain the app id and the type of app.
 void Client::handshake(QString message)
 {
 
     // process handshake data
-    qDebug() << "Handshake started: " << message;
+    qDebug() << "Handshake started:" << message;
     // decode json or whatever format I decide to use
     // set id and apptype
     // set handshake_succes to true
@@ -73,6 +94,7 @@ void Client::handshake(QString message)
     }
 }
 
+// handshake cannot be processed as binary data.
 void Client::falseHandshake(QByteArray message)
 {
     qDebug() << "Data received as bytearray while awaiting handshake...";

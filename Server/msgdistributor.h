@@ -18,6 +18,7 @@ private:
 
 private Q_SLOTS:
     void connectApp(Client *c);
+    void processTextMessages(QString message, QString id, AppType apptype);
 
 signals:
 

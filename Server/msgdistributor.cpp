@@ -27,9 +27,15 @@ void MsgDistributor::connectApp(Client *c)
     // add c to c_clients
     //c_clients << c;
 
-    // connect c to any other apps connected with the same ID.
+    // connect c to the msgdistributor.
+    //connect(c, &Client::textMessageReceived, this, &MsgDistributor::processTextMessages);
 
-    qDebug() << c->getId() << "Connected to all other apps with the same ID.";
+    qDebug() << c->getId() << c->appType() << "Ready to process data";
     Q_UNUSED(c);
+}
+
+void MsgDistributor::processTextMessages(QString message, QString id, AppType apptype)
+{
+    qDebug() << message << id << apptype;
 }
 

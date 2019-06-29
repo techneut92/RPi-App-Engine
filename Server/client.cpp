@@ -82,9 +82,14 @@ void Client::handshake(QString message)
     doc = doc.fromJson(jsondata);
     QJsonObject jsonObject = doc.object();
     QVariantMap jsonMap = jsonObject.toVariantMap();
-    qDebug() << jsonMap["id"] << jsonMap["appType"];
-    // set id and apptype
-    // set handshake_succes to true
+    qDebug() << jsonMap["id"].toString() << jsonMap["appType"].toString();
+    if (!jsonMap.isEmpty() && jsonMap.contains("id") && jsonMap.contains("appType")){
+        // means the data was valid
+        this->id = jsonMap["id"].toString();
+        if (jsonMap["appType"].toString() == "webClient") this->app_type = AppType::WebClient;
+        else if (jsonMap["appType"].toString() == "serverApp") this->app_type = AppType::Server;
+        this->handshake_succes = true;
+    }
 
     if (this->handshake_succes){
         // disconnect previous signals as we don't need to use the handshake anymore.

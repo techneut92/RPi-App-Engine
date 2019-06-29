@@ -24,8 +24,9 @@ void MsgDistributor::connectApp(Client *c)
 {
     // remove c from u_clients
 
-    // add c to c_clients
+    // add c to cc_clients
     //c_clients << c;
+    //this->cc_clients[c->getId()].append(c);
 
     // connect c to the msgdistributor.
     //connect(c, &Client::textMessageReceived, this, &MsgDistributor::processTextMessages);

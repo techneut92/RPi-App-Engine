@@ -83,8 +83,8 @@ void Client::handshake(QString message)
     QJsonObject jsonObject = doc.object();
     QVariantMap jsonMap = jsonObject.toVariantMap();
     qDebug() << jsonMap["id"].toString() << jsonMap["appType"].toString();
-    if (!jsonMap.isEmpty() && jsonMap.contains("id") && jsonMap.contains("appType")){
-        // means the data was valid
+    if (!jsonMap.isEmpty() && !jsonMap["id"].isNull() && !jsonMap["appType"].isNull()){
+        // means the data was valid TODO IS NOT WORKING YET -.- it always contains id somehow
         this->id = jsonMap["id"].toString();
         if (jsonMap["appType"].toString() == "webClient") this->app_type = AppType::WebClient;
         else if (jsonMap["appType"].toString() == "serverApp") this->app_type = AppType::Server;

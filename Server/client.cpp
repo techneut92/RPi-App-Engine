@@ -79,7 +79,7 @@ void Client::handshake(QString message)
     QJsonDocument doc;
     QByteArray jsondata;
     jsondata.append(message);
-    doc.fromJson(jsondata);
+    doc = doc.fromJson(jsondata);
     QJsonObject jsonObject = doc.object();
     QVariantMap jsonMap = jsonObject.toVariantMap();
     qDebug() << jsonMap["id"] << jsonMap["appType"];

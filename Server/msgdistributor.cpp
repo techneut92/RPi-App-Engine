@@ -45,11 +45,10 @@ void MsgDistributor::connectApp(Client *c)
 
 void MsgDistributor::processTextMessages(QString message, Client* origin)
 {
-    qDebug() << "MsgDistributor::processTextMessages: " << message << origin->getId() << origin->appType();
+    qDebug() << "MsgDistributor::processTextMessages: " << message << origin->getId() << origin->appType() << origin->uid;
     if (jsonHandler::isValidJson(message)){
         QVariantMap jmap = jsonHandler::jsonStringToQMap(message);
         if (!jmap["serverTarget"].isNull()){
-            qDebug() << "MsgDistributor::processTextMessages: servertarget: " << jmap["serverTarget"].toString();
             if (jmap["serverTarget"].toString() == "all"){
                 // iterate through all clients with the same id and send a message to all except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
@@ -66,7 +65,11 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
                 qDebug() << "MsgDistributor::processTextMessages: trying to send msg to all clients";
                 // iterate through all clients with the same id and send a message to all client apps except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
-                    if (cc->uid != origin->uid && cc->appType() == AppType::WebClient) cc->sendTextMessage(jmap["msgData"].toString());
+                    qDebug() << "MsgDistributor::processTextMessages: iterating client:" << cc->getId() << cc->uid << cc->appType();
+                    if (cc->uid != origin->uid && cc->appType() == AppType::WebClient) {
+                        qDebug() << "trying to send msg to client:" << cc->uid;
+                        cc->sendTextMessage(jmap["msgData"].toString());
+                    }
                 }
             }
         }

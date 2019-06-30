@@ -27,8 +27,8 @@ int MsgDistributor::getNewUid()
     while (!this->uid_taken.contains(this->uid_counter)){
         this->uid_counter++;
         if (this->uid_counter > MAX_CLIENTS) this->uid_counter = 0;
-        if (counter <= MAX_CLIENTS){
-            qDebug() << "FATAL ERROR!: more then" << QString(MAX_CLIENTS) << "clients are connected already. exiting";
+        if (counter >= MAX_CLIENTS){
+            qDebug() << "FATAL ERROR!: more then" << MAX_CLIENTS << "clients are connected already. exiting";
             exit(255);
         }
     }

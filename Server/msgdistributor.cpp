@@ -84,7 +84,7 @@ void MsgDistributor::connectApp(Client *c)
     connect(c, &Client::textMessageReceived, this, &MsgDistributor::processTextMessages);
 
     qDebug() << "MsgDistributor::connectApp" << c->getId() << c->appType() << "Ready to process data";
-    c->sendTextMessage("READY");
+    c->sendTextMessage("HANDSHAKE_SUCCES " + QString(c->uid));
 }
 
 // process text messages and send them to the correct targets

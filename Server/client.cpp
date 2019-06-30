@@ -104,7 +104,6 @@ void Client::handshake(QString message)
             connect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::processTextMessage);
             connect(this->ws_client, &QWebSocket::binaryMessageReceived,
                     this, &Client::processBinaryMessage);
-            this->ws_client->sendTextMessage("HANDSHAKE_SUCCES");
             this->handshake_succes = true;
             emit handshake_succesful(this);
         }else{

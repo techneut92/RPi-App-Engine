@@ -24,7 +24,7 @@ void MsgDistributor::AppendClient(Client *c)
 int MsgDistributor::getNewUid()
 {
     int counter = 0;
-    while (!this->uid_taken.contains(this->uid_counter)){
+    while (this->uid_taken.contains(this->uid_counter)){
         this->uid_counter++;
         if (this->uid_counter > MAX_CLIENTS) this->uid_counter = 0;
         if (counter >= MAX_CLIENTS){

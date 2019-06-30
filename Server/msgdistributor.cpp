@@ -25,6 +25,11 @@ void MsgDistributor::AppendClient(Client *c)
  function is called after a succesful handshake was done. */
 void MsgDistributor::connectApp(Client *c)
 {
+    // give an unique id
+    c->uid = this->uid_counter;
+    this->uid_counter++;
+    if (this->uid_counter >= 10000) this->uid_counter = 0;
+
     // remove c from u_clients
     this->u_clients.removeOne(c);
 
@@ -48,20 +53,20 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
             if (jmap["serverTarget"].toString() == "all"){
                 // iterate through all clients with the same id and send a message to all except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
-                    if (cc != origin) cc->sendTextMessage(jmap["msgData"].toString());
+                    if (cc->uid != origin->uid) cc->sendTextMessage(jmap["msgData"].toString());
                 }
             }
             else if(jmap["serverTarget"].toString() == "server"){
                 // iterate through all clients with the same id and send a message to all server apps except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
-                    if (cc != origin && cc->appType() == AppType::Server) cc->sendTextMessage(jmap["msgData"].toString());
+                    if (cc->uid != origin->uid && cc->appType() == AppType::Server) cc->sendTextMessage(jmap["msgData"].toString());
                 }
             }
             else if(jmap["serverTarget"].toString() == "client"){
                 qDebug() << "MsgDistributor::processTextMessages: trying to send msg to all clients";
                 // iterate through all clients with the same id and send a message to all client apps except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
-                    if (cc != origin && cc->appType() == AppType::WebClient) cc->sendTextMessage(jmap["msgData"].toString());
+                    if (cc->uid != origin->uid && cc->appType() == AppType::WebClient) cc->sendTextMessage(jmap["msgData"].toString());
                 }
             }
         }

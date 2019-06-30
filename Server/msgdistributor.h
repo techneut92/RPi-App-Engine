@@ -16,6 +16,7 @@ private:
     QList<Client *> u_clients;                  // clients awaiting handshake
     QList<Client *> c_clients;                  // clients connected
     QMap<QString, QList<Client*>> cc_clients;   // clients connected in a qmap for easy access
+    int uid_counter = 0;
 
 private Q_SLOTS:
     void connectApp(Client *c);                 // connects app to

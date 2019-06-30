@@ -32,7 +32,7 @@ public:
     bool awaiting_handshake();                      // Returns the opposite of handshake_succes
     AppType appType();                              // Get function for app_type
     ConnectionType connectionType();                // Get function for con_type
-    //int uid;                                        // optional unique id
+    int uid;                                        // optional unique id
     void sendTextMessage(QString message);          // Function to send a text message over the websocket
     void sendBinaryMessage(QByteArray message);     // Send a binary message over the websocket
 

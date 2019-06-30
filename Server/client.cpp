@@ -54,6 +54,21 @@ void Client::sendBinaryMessage(QByteArray message)
     this->ws_client->sendBinaryMessage(message);
 }
 
+QString Client::getPeerAddress()
+{
+    return this->ws_client->peerAddress().toString();
+}
+
+QString Client::getOrigin()
+{
+    return this->ws_client->origin();
+}
+
+QString Client::getPeerName()
+{
+    return this->ws_client->peerName();
+}
+
 void Client::sendTextMessage(QString message)
 {
     this->ws_client->sendTextMessage(message);

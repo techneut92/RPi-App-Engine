@@ -35,6 +35,9 @@ public:
     int uid;                                        // optional unique id
     void sendTextMessage(QString message);          // Function to send a text message over the websocket
     void sendBinaryMessage(QByteArray message);     // Send a binary message over the websocket
+    QString getPeerAddress();                       // Returns the peerAddress
+    QString getOrigin();                            // Returns the origin
+    QString getPeerName();                          // Returns the peerName
 
 private:
     QString id;                                     // Contains the app ID.

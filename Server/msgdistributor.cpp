@@ -46,16 +46,19 @@ void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap j
         foreach( Client* cc, this->cc_clients[origin->getId()])
             if (cc->uid != origin->uid) cc->sendTextMessage(jmap["msgData"].toString());
     }
-    else if(jmap["serverTarget"].toString() == "server"){
+    else if(jmap["serverTarget"].toString() == "serverApp"){
         // iterate through all clients with the same id and send a message to all server apps except the origin
         foreach( Client* cc, this->cc_clients[origin->getId()])
             if (cc->uid != origin->uid && cc->appType() == AppType::Server) cc->sendTextMessage(jmap["msgData"].toString());
     }
-    else if(jmap["serverTarget"].toString() == "client"){
+    else if(jmap["serverTarget"].toString() == "clientApp"){
         // iterate through all clients with the same id and send a message to all client apps except the origin
         foreach( Client* cc, this->cc_clients[origin->getId()])
             if (cc->uid != origin->uid && cc->appType() == AppType::WebClient)
                 cc->sendTextMessage(jmap["msgData"].toString());
+    }
+    else if (jmap["serverTarget"].toString() == "server"){
+        this->serverCommandManager(origin, jmap);
     }
     else relayMessage(message, origin);
 }
@@ -65,6 +68,34 @@ void MsgDistributor::relayMessage(QString message, Client *origin)
 {
     foreach( Client* cc, this->cc_clients[origin->getId()])
         if (cc->uid != origin->uid && cc->appType() != origin->appType()) cc->sendTextMessage(message);
+}
+
+// REQUIRES TESTING
+// Manages the commands requested to the server
+void MsgDistributor::serverCommandManager(Client* c, QVariantMap data)
+{
+    if (data["action"].toString() == "getClients"){
+        c->sendTextMessage(this->getClientsInJsonString(c->getId()));
+    }
+}
+
+// REQUIRES TESTING
+// handles the 'getClients' action
+QString MsgDistributor::getClientsInJsonString(QString id)
+{
+    QString new_data = "{'clients': [ ";
+
+    foreach(Client *cc, this->cc_clients[id]){
+        new_data += "{\"uid\": " + QString(cc->uid) + ", \"appType\": ";
+        if (cc->appType() == AppType::Server) new_data += "\"serverApp\", ";
+        new_data += "\"peerName\": \"" + cc->getPeerName() + "\", ";
+        new_data += "\"peerAddress\": \"" + cc->getPeerAddress() + "\", ";
+        new_data += "\"origin\": \"" + cc->getOrigin() + "\", ";
+        new_data += "},";
+    }
+
+    new_data += "]}";
+    return new_data;
 }
 
 /* function is a slot connected with the signal from Client::handshake()
@@ -99,7 +130,7 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
             relayMessage(message, origin);
     }
     else
-        relayMessage(message, origin);
+        qDebug() << "invalid message:" << message;
 }
 
 // handles the disconnects

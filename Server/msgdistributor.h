@@ -24,6 +24,8 @@ private:
     int getNewUid();
     void relayMessage(QString message, Client* origin, QVariantMap jmap);
     void relayMessage(QString message, Client* origin);
+    void serverCommandManager(Client *c, QVariantMap data);
+    QString getClientsInJsonString(QString id);
 
 private Q_SLOTS:
     void connectApp(Client *c);                 // connects app to

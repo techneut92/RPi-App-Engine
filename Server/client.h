@@ -32,7 +32,7 @@ public:
     bool awaiting_handshake();                      // returns the opposite of handshake_succes
     AppType appType();                              // get function for app_type
     ConnectionType connectionType();                // get function for con_type
-    //int uid;                                        // unique id given by msg distributor
+    //int uid;                                        // optional unique id
 
 private:
     QString id;                                     // Contains the app ID.

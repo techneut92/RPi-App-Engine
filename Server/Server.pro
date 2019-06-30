@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         client.cpp \
+        jsonhandler.cpp \
         main.cpp \
         msgdistributor.cpp \
         websocketserver.cpp
@@ -28,6 +29,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     client.h \
+    jsonhandler.h \
     msgdistributor.h \
     websocketserver.h
 

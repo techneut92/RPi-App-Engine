@@ -1,5 +1,6 @@
 #include "client.h"
 #include <QWebSocket>
+#include "jsonhandler.h"
 
 Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 {
@@ -76,34 +77,32 @@ void Client::handshake(QString message)
 {
     // process handshake data
     qDebug() << "Handshake started:" << message;
-    QJsonDocument doc;
-    QByteArray jsondata;
-    jsondata.append(message);
-    doc = doc.fromJson(jsondata);
-    QJsonObject jsonObject = doc.object();
-    QVariantMap jsonMap = jsonObject.toVariantMap();
-    qDebug() << jsonMap["id"].toString() << jsonMap["appType"].toString();
-    if (!jsonMap.isEmpty() && !jsonMap["id"].isNull() && !jsonMap["appType"].isNull()){
-        // means the data was valid TODO IS NOT WORKING YET -.- it always contains id somehow
-        this->id = jsonMap["id"].toString();
-        if (jsonMap["appType"].toString() == "webClient") this->app_type = AppType::WebClient;
-        else if (jsonMap["appType"].toString() == "serverApp") this->app_type = AppType::Server;
-        this->handshake_succes = true;
-    }
 
-    if (this->handshake_succes){
-        // disconnect previous signals as we don't need to use the handshake anymore.
-        disconnect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::handshake);
-        disconnect(this->ws_client, &QWebSocket::binaryMessageReceived,
-                this, &Client::falseHandshake);
-        // reconnect the signals to the functions to handle msg distribution
-        connect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::processTextMessage);
-        connect(this->ws_client, &QWebSocket::binaryMessageReceived,
-                this, &Client::processBinaryMessage);
-        this->ws_client->sendTextMessage("HANDSHAKE_SUCCES");
-        emit handshake_succesful(this);
-    }else{
-        this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message); // TODO add error
+    // convert json to qvariantmap
+    if (jsonHandler::isValidJson(message)) {
+        QVariantMap jsonMap = jsonHandler::jsonStringToQMap(message);
+        if (!jsonMap.isEmpty() && !jsonMap["id"].isNull() && !jsonMap["appType"].isNull()){
+            // means the data was valid
+            this->id = jsonMap["id"].toString();
+            if (jsonMap["appType"].toString() == "webClient") this->app_type = AppType::WebClient;
+            else if (jsonMap["appType"].toString() == "serverApp") this->app_type = AppType::Server;
+            //if (!jsonMap["uid"].isNull()) this->uid = jsonMap["uid"].toString();
+
+            // disconnect previous signals as we don't need to use the handshake anymore.
+            disconnect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::handshake);
+            disconnect(this->ws_client, &QWebSocket::binaryMessageReceived,
+                    this, &Client::falseHandshake);
+            // reconnect the signals to the functions to handle msg distribution
+            connect(this->ws_client, &QWebSocket::textMessageReceived, this, &Client::processTextMessage);
+            connect(this->ws_client, &QWebSocket::binaryMessageReceived,
+                    this, &Client::processBinaryMessage);
+            this->ws_client->sendTextMessage("HANDSHAKE_SUCCES");
+            this->handshake_succes = true;
+            emit handshake_succesful(this);
+        }
+        else{
+            this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message); // TODO add error
+        }
     }
 }
 

@@ -29,10 +29,12 @@ public:
     ~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
 
     QString getId() const;                          // Get function for the app id
-    bool awaiting_handshake();                      // returns the opposite of handshake_succes
-    AppType appType();                              // get function for app_type
-    ConnectionType connectionType();                // get function for con_type
+    bool awaiting_handshake();                      // Returns the opposite of handshake_succes
+    AppType appType();                              // Get function for app_type
+    ConnectionType connectionType();                // Get function for con_type
     //int uid;                                        // optional unique id
+    void sendTextMessage(QString message);          // Function to send a text message over the websocket
+    void sendBinaryMessage(QByteArray message);     // Send a binary message over the websocket
 
 private:
     QString id;                                     // Contains the app ID.

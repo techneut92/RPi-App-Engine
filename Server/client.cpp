@@ -49,6 +49,16 @@ ConnectionType Client::connectionType()
     return this->con_type;
 }
 
+void Client::sendBinaryMessage(QByteArray message)
+{
+    this->ws_client->sendBinaryMessage(message);
+}
+
+void Client::sendTextMessage(QString message)
+{
+    this->ws_client->sendTextMessage(message);
+}
+
 // Messages are handled in the msg distributor, as such it will be directly emitted.
 void Client::processTextMessage(QString message)
 {

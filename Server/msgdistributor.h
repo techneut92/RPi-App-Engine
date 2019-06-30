@@ -22,6 +22,8 @@ private:
     QList<int> uid_taken;
 
     int getNewUid();
+    void relayMessage(QString message, Client* origin, QVariantMap jmap);
+    void relayMessage(QString message, Client* origin);
 
 private Q_SLOTS:
     void connectApp(Client *c);                 // connects app to

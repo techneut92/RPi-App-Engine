@@ -75,6 +75,18 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
                     }
                 }
             }
+            else{
+                // iterate through clients with same id and send messages to all different apptypes
+                foreach( Client* cc, this->cc_clients[origin->getId()]){
+                    if (cc->uid != origin->uid && cc->appType() != origin->appType()) cc->sendTextMessage(message);
+                }
+            }
+        }
+        else{
+            // iterate through clients with same id and send messages to all different apptypes
+            foreach( Client* cc, this->cc_clients[origin->getId()]){
+                if (cc->uid != origin->uid && cc->appType() != origin->appType()) cc->sendTextMessage(message);
+            }
         }
     }else{
         // iterate through clients with same id and send messages to all different apptypes

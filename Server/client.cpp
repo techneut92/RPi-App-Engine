@@ -109,6 +109,8 @@ void Client::handshake(QString message)
             this->ws_client->sendTextMessage("HANDSHAKE_SUCCES");
             this->handshake_succes = true;
             emit handshake_succesful(this);
+        }else{
+            this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message);
         }
     }else{
         this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message); // TODO add error

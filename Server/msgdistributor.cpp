@@ -44,6 +44,7 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
     if (jsonHandler::isValidJson(message)){
         QVariantMap jmap = jsonHandler::jsonStringToQMap(message);
         if (!jmap["serverTarget"].isNull()){
+            qDebug() << "MsgDistributor::processTextMessages: servertarget: " << jmap["serverTarget"].toString();
             if (jmap["serverTarget"].toString() == "all"){
                 // iterate through all clients with the same id and send a message to all except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
@@ -57,6 +58,7 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
                 }
             }
             else if(jmap["serverTarget"].toString() == "client"){
+                qDebug() << "MsgDistributor::processTextMessages: trying to send msg to all clients";
                 // iterate through all clients with the same id and send a message to all client apps except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
                     if (cc != origin && cc->appType() == AppType::WebClient) cc->sendTextMessage(jmap["msgData"].toString());

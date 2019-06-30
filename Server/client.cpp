@@ -62,17 +62,15 @@ void Client::sendTextMessage(QString message)
 // Messages are handled in the msg distributor, as such it will be directly emitted.
 void Client::processTextMessage(QString message)
 {
-    qDebug() << message;
     emit textMessageReceived(message, this);
 }
 
 void Client::processBinaryMessage(QByteArray message)
 {
-    qDebug() << message;
     emit binaryMessageReceived(message, this);
 }
 
-// TODO HANDLE DISCONNECTS
+// handles disconnects
 void Client::socketDisconnected()
 {
     qDebug() << "disconnected";

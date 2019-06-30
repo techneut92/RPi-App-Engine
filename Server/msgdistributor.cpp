@@ -58,6 +58,7 @@ void MsgDistributor::connectApp(Client *c)
     c->sendTextMessage("READY");
 }
 
+// process text messages and send them to the correct targets
 void MsgDistributor::processTextMessages(QString message, Client* origin)
 {
     qDebug() << "MsgDistributor::processTextMessages: " << message << origin->getId() << origin->appType() << origin->uid;
@@ -111,7 +112,7 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
     }
 }
 
-// TODO check FIX
+// handles the disconnects
 void MsgDistributor::onDisconnect(Client *c)
 {
     if (c->awaiting_handshake()){

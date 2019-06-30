@@ -4,7 +4,7 @@
 #include <QObject>
 #include "client.h"
 
-#define MAX_CLIENTS 10000
+#define MAX_CLIENTS 100000 // max value of an int should be 2147483647. so this is fine hopefully.
 
 class MsgDistributor : public QObject
 {

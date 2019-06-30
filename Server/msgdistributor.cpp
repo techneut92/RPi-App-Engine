@@ -66,6 +66,9 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
                 // iterate through all clients with the same id and send a message to all client apps except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
                     qDebug() << "MsgDistributor::processTextMessages: iterating client:" << cc->getId() << cc->uid << cc->appType();
+                    qDebug() << "is apptype webclient" << (cc->appType() == AppType::WebClient);
+                    qDebug() << "is apptype server" << (cc->appType() == AppType::Server);
+                    qDebug() << "is apptype unkowntype" << (cc->appType() == AppType::UnkownType);
                     if (cc->uid != origin->uid && cc->appType() == AppType::WebClient) {
                         qDebug() << "trying to send msg to client:" << cc->uid;
                         cc->sendTextMessage(jmap["msgData"].toString());

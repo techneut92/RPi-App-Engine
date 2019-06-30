@@ -63,13 +63,13 @@ void Client::sendTextMessage(QString message)
 void Client::processTextMessage(QString message)
 {
     qDebug() << message;
-    emit textMessageReceived(message, this->id, this->app_type);
+    emit textMessageReceived(message, this);
 }
 
 void Client::processBinaryMessage(QByteArray message)
 {
     qDebug() << message;
-    emit binaryMessageReceived(message, this->id, this->app_type);
+    emit binaryMessageReceived(message, this);
 }
 
 // TODO HANDLE DISCONNECTS

@@ -1,5 +1,6 @@
 #include "msgdistributor.h"
 #include "jsonhandler.h"
+#include <QMap>
 
 MsgDistributor::MsgDistributor(QObject *parent) : QObject(parent)
 {
@@ -25,10 +26,9 @@ void MsgDistributor::AppendClient(Client *c)
 void MsgDistributor::connectApp(Client *c)
 {
     // remove c from u_clients
-    qDebug() << "MsgDistributor::connectApp: Attempting to remove client from u_clients" << this->u_clients.removeOne(c);
+    this->u_clients.removeOne(c);
 
     // add c to cc_clients
-    //c_clients << c;
     this->cc_clients[c->getId()].append(c);
 
     // connect c to the msgdistributor.
@@ -38,36 +38,52 @@ void MsgDistributor::connectApp(Client *c)
     c->sendTextMessage("READY");
 }
 
-void MsgDistributor::processTextMessages(QString message, QString id, AppType apptype)
+void MsgDistributor::processTextMessages(QString message, Client* origin)
 {
-    qDebug() << "MsgDistributor::processTextMessages: " << message << id << apptype;
+    qDebug() << "MsgDistributor::processTextMessages: " << message << origin->getId() << origin->appType();
     if (jsonHandler::isValidJson(message)){
         QVariantMap jmap = jsonHandler::jsonStringToQMap(message);
         if (!jmap["serverTarget"].isNull()){
             if (jmap["serverTarget"].toString() == "all"){
                 // iterate through all clients with the same id and send a message to all except the origin
+                foreach( Client* cc, this->cc_clients[origin->getId()]){
+                    if (cc != origin) cc->sendTextMessage(jmap["msgData"].toString());
+                }
             }
             else if(jmap["serverTarget"].toString() == "server"){
                 // iterate through all clients with the same id and send a message to all server apps except the origin
+                foreach( Client* cc, this->cc_clients[origin->getId()]){
+                    if (cc != origin && cc->appType() == AppType::Server) cc->sendTextMessage(jmap["msgData"].toString());
+                }
             }
             else if(jmap["serverTarget"].toString() == "client"){
                 // iterate through all clients with the same id and send a message to all client apps except the origin
+                foreach( Client* cc, this->cc_clients[origin->getId()]){
+                    if (cc != origin && cc->appType() == AppType::WebClient) cc->sendTextMessage(jmap["msgData"].toString());
+                }
             }
         }
     }else{
         // iterate through clients with same id and send messages to all different apptypes
+        foreach( Client* cc, this->cc_clients[origin->getId()]){
+            if (cc != origin && cc->appType() == origin->appType()) cc->sendTextMessage(message);
+        }
     }
 }
 
-// TODO FIX
+// TODO check FIX
 void MsgDistributor::onDisconnect(Client *c)
 {
     if (c->awaiting_handshake()){
-        // TODO REMOVE client from u_clients
+        // remove client from u_clients
+        this->u_clients.removeOne(c);
+        qDebug() << "Client without handshake disconnected"; // TODO MOVE TO CLIENT
     }else{
-        // TODO REMOVE CLIENT FROM CC_CLIENTS
+        // remove from cc_clients
+        this->cc_clients[c->getId()].removeOne(c);
+        qDebug() << "Client Disconnected" << c->getId(); // TODO MOVE TO CLIENT
     }
     delete c;
-    qDebug() << "not handling the disconnect atm...";
+
 }
 

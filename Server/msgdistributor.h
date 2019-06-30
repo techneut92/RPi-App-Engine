@@ -19,7 +19,7 @@ private:
 
 private Q_SLOTS:
     void connectApp(Client *c);                 // connects app to
-    void processTextMessages(QString message, QString id, AppType apptype);
+    void processTextMessages(QString message, Client* origin);
     void onDisconnect(Client *c);
 
 signals:

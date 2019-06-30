@@ -62,13 +62,13 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
                 }
             }
             else if(jmap["serverTarget"].toString() == "client"){
-                qDebug() << "MsgDistributor::processTextMessages: trying to send msg to all clients";
+                //qDebug() << "MsgDistributor::processTextMessages: trying to send msg to all clients";
                 // iterate through all clients with the same id and send a message to all client apps except the origin
                 foreach( Client* cc, this->cc_clients[origin->getId()]){
-                    qDebug() << "MsgDistributor::processTextMessages: iterating client:" << cc->getId() << cc->uid << cc->appType();
-                    qDebug() << "is apptype webclient" << (cc->appType() == AppType::WebClient);
-                    qDebug() << "is apptype server" << (cc->appType() == AppType::Server);
-                    qDebug() << "is apptype unkowntype" << (cc->appType() == AppType::UnkownType);
+                    //qDebug() << "MsgDistributor::processTextMessages: iterating client:" << cc->getId() << cc->uid << cc->appType();
+                    //qDebug() << "is apptype webclient" << (cc->appType() == AppType::WebClient);
+                    //qDebug() << "is apptype server" << (cc->appType() == AppType::Server);
+                    //qDebug() << "is apptype unkowntype" << (cc->appType() == AppType::UnkownType);
                     if (cc->uid != origin->uid && cc->appType() == AppType::WebClient) {
                         qDebug() << "trying to send msg to client:" << cc->uid;
                         cc->sendTextMessage(jmap["msgData"].toString());
@@ -96,7 +96,7 @@ void MsgDistributor::onDisconnect(Client *c)
         this->cc_clients[c->getId()].removeOne(c);
         qDebug() << "Client Disconnected" << c->getId(); // TODO MOVE TO CLIENT
     }
-    delete c;
+    //delete c;
 
 }
 

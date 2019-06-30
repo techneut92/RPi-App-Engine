@@ -21,14 +21,29 @@ void MsgDistributor::AppendClient(Client *c)
     connect(c, &Client::disconnected, this, &MsgDistributor::onDisconnect);
 }
 
+int MsgDistributor::getNewUid()
+{
+    int counter = 0;
+    while (!this->uid_taken.contains(this->uid_counter)){
+        this->uid_counter++;
+        if (this->uid_counter > MAX_CLIENTS) this->uid_counter = 0;
+        if (counter <= MAX_CLIENTS){
+            qDebug() << "FATAL ERROR!: more then" << QString(MAX_CLIENTS) << "clients are connected already. exiting";
+            exit(255);
+        }
+    }
+    this->uid_taken << this->uid_counter;
+    int uid = this->uid_counter;
+    this->uid_counter++;
+    return uid;
+}
+
 /* function is a slot connected with the signal from Client::handshake()
  function is called after a succesful handshake was done. */
 void MsgDistributor::connectApp(Client *c)
 {
     // give an unique id
-    c->uid = this->uid_counter;
-    this->uid_counter++;
-    if (this->uid_counter >= 10000) this->uid_counter = 0;
+    c->uid = this->getNewUid();
 
     // remove c from u_clients
     this->u_clients.removeOne(c);
@@ -104,11 +119,11 @@ void MsgDistributor::onDisconnect(Client *c)
         this->u_clients.removeOne(c);
         qDebug() << "Client without handshake disconnected"; // TODO MOVE TO CLIENT
     }else{
+        // remove uid from the uid taken list
+        this->uid_taken.removeOne(c->uid);
         // remove from cc_clients
         this->cc_clients[c->getId()].removeOne(c);
         qDebug() << "Client Disconnected" << c->getId(); // TODO MOVE TO CLIENT
     }
-    //delete c;
-
 }
 

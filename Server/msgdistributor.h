@@ -4,6 +4,8 @@
 #include <QObject>
 #include "client.h"
 
+#define MAX_CLIENTS 10000
+
 class MsgDistributor : public QObject
 {
     Q_OBJECT
@@ -17,6 +19,9 @@ private:
     QList<Client *> c_clients;                  // clients connected
     QMap<QString, QList<Client*>> cc_clients;   // clients connected in a qmap for easy access
     int uid_counter = 0;
+    QList<int> uid_taken;
+
+    int getNewUid();
 
 private Q_SLOTS:
     void connectApp(Client *c);                 // connects app to

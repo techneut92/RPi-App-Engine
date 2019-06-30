@@ -2,4 +2,7 @@
 - add tcp connections on port 9737
   - seperate client into 3 classes, 1 to inherit from and a websocket client and a tcp client.
 - add validation on apps? (how would i even do that, is it even possible if all the code is open source)
-
+- make client types strings and be able to add different kinds of clients
+  - save the list in json format on a local file.
+- add server controls
+- add server cli

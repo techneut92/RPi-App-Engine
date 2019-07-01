@@ -22,10 +22,10 @@ class RpaeApp:
         elif message.startswith("HANDSHAKE_SUCCESS"):
             message.split(' ')
             self._uid = int(message[1])
-            self._ws.on_message = self.onMessage
+            self._ws.on_message = self._onMessage
             self._ws.on_open = None
             self.onOpen()
-            [self.onMessage(m) for m in self._queue]
+            [self._onMessage(m) for m in self._queue]
             self._isReady = True
         elif message.startswith("HANDSHAKE_FAILURE"):
             self._onError(message)
@@ -35,8 +35,8 @@ class RpaeApp:
     # create a package to send over the server
     def _createPackage(self, message, appType, uidTarget):
         package = json.dumps({
-            'origin': self._uid,
-            'originName': self.id,
+            # 'origin': self._uid,
+            # 'originName': self.id,
             'msgData': message
         })
         if appType is not None:
@@ -51,7 +51,7 @@ class RpaeApp:
         self._ws.send(self._createPackage(message, appType=appType, uidTarget=uidTarget))
 
     # Receives messages after handshake is complete, should be overwritten
-    def onMessage(self, message):
+    def onMessage(self, message, origin):
         pass
 
     # onOpen function triggers when handshake is complete, could be overwritten
@@ -61,6 +61,18 @@ class RpaeApp:
     # public onError function, could be overwritten
     def onError(self, error):
         pass
+
+    # private onMessage function
+    def _onMessage(self, message):
+        try:
+            message = json.loads(message)
+        except ValueError:
+            self.onMessage(message, None)
+            return
+        if message["originName"] == "server":
+            pass  # TODO CREATE
+        else:
+            self.onMessage(message["msgData"], message["origin"])
 
     # sets connected to true once the websocket opens
     def _onOpen(self):

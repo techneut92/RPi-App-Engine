@@ -83,7 +83,7 @@ void MsgDistributor::serverCommandManager(Client* c, QVariantMap data)
 // handles the 'getClients' action
 QString MsgDistributor::getClientsInJsonString(QString id)
 {
-    QString new_data = "{'clients': [ ";
+    QString new_data = "{'originName': 'server', 'clients': [ ";
 
     foreach(Client *cc, this->cc_clients[id]){
         new_data += "{\"uid\": " + QString(cc->uid) + ", \"appType\": ";
@@ -115,7 +115,7 @@ void MsgDistributor::connectApp(Client *c)
     connect(c, &Client::textMessageReceived, this, &MsgDistributor::processTextMessages);
 
     qDebug() << "MsgDistributor::connectApp" << c->getId() << c->appType() << "Ready to process data";
-    c->sendTextMessage("HANDSHAKE_SUCCESS " + QString(c->uid));
+    c->sendTextMessage("HANDSHAKE_SUCCESS " + QString::number(c->uid));
 }
 
 // process text messages and send them to the correct targets
@@ -141,11 +141,16 @@ void MsgDistributor::onDisconnect(Client *c)
         this->u_clients.removeOne(c);
         qDebug() << "Client without handshake disconnected"; // TODO MOVE TO CLIENT
     }else{
+        qDebug() << "Client Disconnected" << c->getId(); // TODO MOVE TO CLIENT
         // remove uid from the uid taken list
         this->uid_taken.removeOne(c->uid);
         // remove from cc_clients
-        this->cc_clients[c->getId()].removeOne(c);
-        qDebug() << "Client Disconnected" << c->getId(); // TODO MOVE TO CLIENT
+        //this->cc_clients[c->getId()].removeOne(c); // TODO FIX, segmentation errors
+        QMutableListIterator<Client*> l(this->cc_clients[c->getId()]);
+        while(l.hasNext()){
+            if (l.next()->uid == c->uid)
+                l.remove();
+        }
     }
 }
 

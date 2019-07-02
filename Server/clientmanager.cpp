@@ -119,7 +119,10 @@ QString ClientManager::getClientsPackage(QString id, int ruid)
     mainObject.insert("clients", clientsArray);
 
     QJsonDocument  json(mainObject);
-    return this->genPackage(json.toJson());
+    QString jsonString = json.toJson();
+    jsonString.remove("\n");
+    jsonString.remove(' ');
+    return this->genPackage(jsonString);
 }
 
 QString ClientManager::getClientsPackage(QString id)

@@ -97,7 +97,7 @@ void Client::socketDisconnected()
 {
     if (this->ws_client->isValid())
         this->ws_client->close();
-    delete this->ws_client;
+    //delete this->ws_client;
     this->ws_client_deleted = true;
     emit disconnected(this);
 }

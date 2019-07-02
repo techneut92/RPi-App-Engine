@@ -47,14 +47,14 @@ void ClientManager::connectApp(Client *c)
 
 void ClientManager::onDisconnect(Client *c)
 {
+    disconnect(c, &Client::disconnected, this, &ClientManager::onDisconnect);
     if (c->awaiting_handshake()){
         qDebug() << "Client without handshake disconnected" << c->uid;
         // remove from cc_clients
         this->u_clients.remove(c->uid);
     }else{
         qDebug() << "Client Disconnected" << c->getId() << c->uid;
-        int d_uid = c->uid;
-        qDebug() << "cc_clients contains uid key:" << this->cc_clients.keys().contains(c->uid);
+        disconnect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
         this->cc_clients.remove(c->uid); // TODO FIX, segmentation errors??
 
         QMutableListIterator<int> i(this->sorted_uids[c->getId()]);
@@ -62,11 +62,8 @@ void ClientManager::onDisconnect(Client *c)
             if (i.next() == c->uid)
                 i.remove();
         }
-        if (this->uidTaken(d_uid))
-            qDebug() << "UID IS STILL TAKEN AFTER DISCONNECT, FIX IT";
-        else {
-            qDebug() << "SUCCESFULLY REMOVED UID AFTER DISCONNECT, REMOVE DEBUGS";
-        }
+        if (this->sorted_uids[c->getId()].count() == 0)
+            this->sorted_uids.remove(c->getId());
     }
 }
 
@@ -131,7 +128,7 @@ QString ClientManager::genPackage(QString message)
 
     QJsonDocument doc(mainObject);
     QString jsonString = doc.toJson();
-    jsonString.remove("\n");
+    jsonString.remove('\n');
     jsonString.remove(' ');
     jsonString.replace("\\\"", "\"");
     return jsonString;

@@ -26,7 +26,7 @@ class Client : public QObject
     Q_OBJECT
 public:
     explicit Client(QWebSocket *cl, QObject *parent = nullptr);
-    ~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
+    //~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
 
     QString getId() const;                          // Get function for the app id
     bool awaiting_handshake();                      // Returns the opposite of handshake_succes

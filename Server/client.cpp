@@ -18,15 +18,15 @@ Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 }
 
 // destructor makes sure the connection is closed and deleted.
-Client::~Client()
-{
-    qDebug() << "check if wsclient valid:" << this->ws_client->isValid();
-    if (this->ws_client->isValid())
-        this->ws_client->close();
-    qDebug() << "setting wsclient to nullptr";
-    this->ws_client = nullptr;
-    qDebug() << "succesfully executed client destructor";
-}
+//Client::~Client()
+//{
+//    qDebug() << "check if wsclient valid:" << this->ws_client->isValid();
+//    if (this->ws_client->isValid())
+//        this->ws_client->close();
+//    qDebug() << "setting wsclient to nullptr";
+//    this->ws_client = nullptr;
+//    qDebug() << "succesfully executed client destructor";
+//}
 
 // getter for id
 QString Client::getId() const
@@ -73,21 +73,6 @@ QString Client::getPeerName()
     return this->ws_client->peerName();
 }
 
-/*
-QString Client::genUniqueId()
-{
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-    QByteArray hashable_data;
-    QString salt = QString::number(QRandomGenerator::global()->generate());
-    hashable_data.append(salt);
-    hashable_data.append(this->getOrigin());
-    hashable_data.append(this->getPeerName());
-    hashable_data.append(this->getPeerAddress());
-    hashable_data.append(QString::number(this->ws_client->peerPort()));
-    hash.addData(hashable_data);
-    return QString(hash.result());
-}*/
-
 void Client::sendTextMessage(QString message)
 {
     this->ws_client->sendTextMessage(message);
@@ -107,8 +92,8 @@ void Client::processBinaryMessage(QByteArray message)
 // handles disconnects
 void Client::socketDisconnected()
 {
-    qDebug() << "disconnected";
-    this->ws_client->close();
+    if (this->ws_client->isValid())
+        this->ws_client->close();
     delete this->ws_client;
     emit disconnected(this);
 }

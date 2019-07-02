@@ -26,7 +26,7 @@ class Client : public QObject
     Q_OBJECT
 public:
     explicit Client(QWebSocket *cl, QObject *parent = nullptr);
-    //~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
+    ~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
 
     QString getId() const;                          // Get function for the app id
     bool awaiting_handshake();                      // Returns the opposite of handshake_succes
@@ -45,6 +45,7 @@ private:
     bool handshake_succes = false;                  // Registers if the handshake was done succesfully.
     ConnectionType con_type;                        // currently always set to websocket, is there in case of expansion to tcp connections.
     AppType app_type = UnkownType;                  // Will contain the apptype if it's either a client or server type.
+    bool ws_client_deleted = false;
 
 private Q_SLOTS:
     void processTextMessage(QString message);       // Captures text messages from the websocket

@@ -18,15 +18,14 @@ Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 }
 
 // destructor makes sure the connection is closed and deleted.
-//Client::~Client()
-//{
-//    qDebug() << "check if wsclient valid:" << this->ws_client->isValid();
-//    if (this->ws_client->isValid())
-//        this->ws_client->close();
-//    qDebug() << "setting wsclient to nullptr";
-//    this->ws_client = nullptr;
-//    qDebug() << "succesfully executed client destructor";
-//}
+Client::~Client()
+{
+    if (this->ws_client_deleted){
+        if (this->ws_client->isValid())
+            this->ws_client->close();
+        delete this->ws_client;
+    }
+}
 
 // getter for id
 QString Client::getId() const
@@ -95,6 +94,7 @@ void Client::socketDisconnected()
     if (this->ws_client->isValid())
         this->ws_client->close();
     delete this->ws_client;
+    this->ws_client_deleted = true;
     emit disconnected(this);
 }
 

@@ -49,15 +49,8 @@ void ClientManager::onDisconnect(Client *c)
 {
     if (c->awaiting_handshake()){
         qDebug() << "Client without handshake disconnected" << c->uid;
-        int d_uid = c->uid; // TODO REMOVE AFTER DEBUGGING
         // remove from cc_clients
-        // TODO FIX, segmentation errors
         this->u_clients.remove(c->uid);
-        if (this->uidTaken(d_uid))
-            qDebug() << "UID IS STILL TAKEN AFTER DISCONNECT, FIX IT";
-        else {
-            qDebug() << "SUCCESFULLY REMOVED UID AFTER DISCONNECT, REMOVE DEBUGS";
-        }
     }else{
         qDebug() << "Client Disconnected" << c->getId() << c->uid;
         int d_uid = c->uid;

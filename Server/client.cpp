@@ -1,7 +1,6 @@
 #include "client.h"
 #include <QWebSocket>
 #include "jsonhandler.h"
-#include <QRandomGenerator>
 
 Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 {

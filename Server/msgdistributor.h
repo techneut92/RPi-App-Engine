@@ -12,29 +12,22 @@ class MsgDistributor : public QObject
 public:
     explicit MsgDistributor(QObject *parent = nullptr);
     ~MsgDistributor() override;
-    void AppendClient(Client *c);               // append newly connected client
+    void setCcClients(QMap<int, Client *> &c);
+    void setSortedUids(QMap<QString, QList<int> > &su);
 
 private:
-    QList<Client *> u_clients;                  // clients awaiting handshake
-    QList<Client *> c_clients;                  // clients connected
-    QMap<QString, QList<Client*>> cc_clients;   // clients connected in a qmap for easy access
-    int uid_counter = 0;
-    QList<int> uid_taken;
-
-    int getNewUid();
     void relayMessage(QString message, Client* origin, QVariantMap jmap);
     void relayMessage(QString message, Client* origin);
-    void serverCommandManager(Client *c, QVariantMap data);
-    QString getClientsInJsonString(QString id);
+    QMap<int, Client*> cc_clients;
+    QMap<QString, QList<int>> sorted_uids;
 
 private Q_SLOTS:
-    void connectApp(Client *c);                 // connects app to
-    void processTextMessages(QString message, Client* origin);
-    void onDisconnect(Client *c);
 
 signals:
+    void msgToSend(QString target, QString message);
 
 public slots:
+    void processTextMessages(QString message, Client* origin);
 };
 
 #endif // MSGDISTRIBUTOR_H

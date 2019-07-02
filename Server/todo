@@ -6,3 +6,4 @@
   - save the list in json format on a local file.
 - add server controls
 - add server cli
+- make a thread to check and remove unhandshaked clients after x seconds

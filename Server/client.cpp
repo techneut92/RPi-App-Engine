@@ -1,6 +1,7 @@
 #include "client.h"
 #include <QWebSocket>
 #include "jsonhandler.h"
+#include <QRandomGenerator>
 
 Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 {
@@ -69,6 +70,21 @@ QString Client::getPeerName()
     return this->ws_client->peerName();
 }
 
+/*
+QString Client::genUniqueId()
+{
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    QByteArray hashable_data;
+    QString salt = QString::number(QRandomGenerator::global()->generate());
+    hashable_data.append(salt);
+    hashable_data.append(this->getOrigin());
+    hashable_data.append(this->getPeerName());
+    hashable_data.append(this->getPeerAddress());
+    hashable_data.append(QString::number(this->ws_client->peerPort()));
+    hash.addData(hashable_data);
+    return QString(hash.result());
+}*/
+
 void Client::sendTextMessage(QString message)
 {
     this->ws_client->sendTextMessage(message);
@@ -120,7 +136,7 @@ void Client::handshake(QString message)
             connect(this->ws_client, &QWebSocket::binaryMessageReceived,
                     this, &Client::processBinaryMessage);
             this->handshake_succes = true;
-            emit handshake_succesful(this);
+            emit handshake_succesful(this); // emits to msgdistributor connectapp
         }else{
             this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message);
         }

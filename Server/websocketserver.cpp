@@ -6,12 +6,13 @@
 #include <QtNetwork/QSslKey>
 #include <QSettings>
 #include <QDebug>
+#include "clientmanager.h"
 
-WebsocketServer::WebsocketServer(MsgDistributor *ms, QObject *parent) :
+WebsocketServer::WebsocketServer(ClientManager *cm, QObject *parent) :
     QObject(parent),
     websocketServer(nullptr)
 {
-    this->msg_dist = ms;
+    this->cm = cm;
     QSettings settings("/etc/rpae/server/server.ini", QSettings::IniFormat);
     quint16 port = settings.value("websocket_server/port", "").toString().toUShort(); //TODO REPLACE
     if (settings.value("websocket_server/ssl_enabled", "").toString() == "true"){
@@ -58,7 +59,8 @@ WebsocketServer::~WebsocketServer()
 {
     qDebug() << "Closing and cleaning up the websocketserver...";
     websocketServer->close();
-    this->msg_dist = nullptr;
+    //this->msg_dist = nullptr;
+    delete this->cm;
 }
 
 void WebsocketServer::onNewConnection()
@@ -67,7 +69,7 @@ void WebsocketServer::onNewConnection()
 
     qDebug() << "Client connected:" << pSocket->peerAddress() << pSocket->origin();
 
-    this->msg_dist->AppendClient(new Client(pSocket));
+    this->cm->appendClient(new Client(pSocket));
 }
 
 void WebsocketServer::onSslErrors(const QList<QSslError> &errors)

@@ -9,56 +9,43 @@ MsgDistributor::MsgDistributor(QObject *parent) : QObject(parent)
 
 MsgDistributor::~MsgDistributor()
 {
-    qDeleteAll(u_clients.begin(), u_clients.end());
-    qDeleteAll(c_clients.begin(), c_clients.end());
+
 }
 
-/* Appends a new connected client and connects the signal to wait for a succesfull handshake */
-void MsgDistributor::AppendClient(Client *c)
+void MsgDistributor::setCcClients(QMap<int, Client *> &c)
 {
-    this->u_clients << c;
-    connect(c, &Client::handshake_succesful, this, &MsgDistributor::connectApp);
-    connect(c, &Client::disconnected, this, &MsgDistributor::onDisconnect);
+    this->cc_clients = c;
 }
 
-int MsgDistributor::getNewUid()
+void MsgDistributor::setSortedUids(QMap<QString, QList<int> > &su)
 {
-    int counter = 0;
-    while (this->uid_taken.contains(this->uid_counter)){
-        this->uid_counter++;
-        if (this->uid_counter > MAX_CLIENTS) this->uid_counter = 0;
-        if (counter >= MAX_CLIENTS){
-            qDebug() << "FATAL ERROR!: more then" << MAX_CLIENTS << "clients are connected already. exiting";
-            exit(255);
-        }
-    }
-    this->uid_taken << this->uid_counter;
-    int uid = this->uid_counter;
-    this->uid_counter++;
-    return uid;
+    this->sorted_uids = su;
 }
 
 // Function to relay messages to specific client groups
 void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap jmap)
 {
+    qDebug() << "DEBUGGING: Relay Message in msgdist called. currently contains clients: " << this->cc_clients.count();
     if (jmap["serverTarget"].toString() == "all"){
         // iterate through all clients with the same id and send a message to all client types except the origin
-        foreach( Client* cc, this->cc_clients[origin->getId()])
-            if (cc->uid != origin->uid) cc->sendTextMessage(jmap["msgData"].toString());
+        //this->sorted_uids[""].append(1);
+        foreach(int uid, this->sorted_uids[origin->getId()])
+            if (uid != origin->uid) this->cc_clients[uid]->sendTextMessage(jmap["msgData"].toString());
     }
     else if(jmap["serverTarget"].toString() == "serverApp"){
         // iterate through all clients with the same id and send a message to all server apps except the origin
-        foreach( Client* cc, this->cc_clients[origin->getId()])
-            if (cc->uid != origin->uid && cc->appType() == AppType::Server) cc->sendTextMessage(jmap["msgData"].toString());
+        foreach( int uid, this->sorted_uids[origin->getId()])
+            if (uid != origin->uid && this->cc_clients[uid]->appType() == AppType::Server)
+                this->cc_clients[uid]->sendTextMessage(jmap["msgData"].toString());
     }
     else if(jmap["serverTarget"].toString() == "clientApp"){
         // iterate through all clients with the same id and send a message to all client apps except the origin
-        foreach( Client* cc, this->cc_clients[origin->getId()])
-            if (cc->uid != origin->uid && cc->appType() == AppType::WebClient)
-                cc->sendTextMessage(jmap["msgData"].toString());
+        foreach( int uid, this->sorted_uids[origin->getId()])
+            if (this->cc_clients[uid]->uid != origin->uid && this->cc_clients[uid]->appType() == AppType::WebClient)
+               this->cc_clients[uid]->sendTextMessage(jmap["msgData"].toString());
     }
     else if (jmap["serverTarget"].toString() == "server"){
-        this->serverCommandManager(origin, jmap);
+        //this->serverCommandManager(origin, jmap);
     }
     else relayMessage(message, origin);
 }
@@ -66,56 +53,8 @@ void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap j
 // iterate through clients with same id and send messages to all different apptypes
 void MsgDistributor::relayMessage(QString message, Client *origin)
 {
-    foreach( Client* cc, this->cc_clients[origin->getId()])
-        if (cc->uid != origin->uid && cc->appType() != origin->appType()) cc->sendTextMessage(message);
-}
-
-// REQUIRES TESTING
-// Manages the commands requested to the server
-void MsgDistributor::serverCommandManager(Client* c, QVariantMap data)
-{
-    if (data["action"].toString() == "getClients"){
-        c->sendTextMessage(this->getClientsInJsonString(c->getId()));
-    }
-}
-
-// REQUIRES TESTING
-// handles the 'getClients' action
-QString MsgDistributor::getClientsInJsonString(QString id)
-{
-    QString new_data = "{'originName': 'server', 'clients': [ ";
-
-    foreach(Client *cc, this->cc_clients[id]){
-        new_data += "{\"uid\": " + QString(cc->uid) + ", \"appType\": ";
-        if (cc->appType() == AppType::Server) new_data += "\"serverApp\", ";
-        new_data += "\"peerName\": \"" + cc->getPeerName() + "\", ";
-        new_data += "\"peerAddress\": \"" + cc->getPeerAddress() + "\", ";
-        new_data += "\"origin\": \"" + cc->getOrigin() + "\", ";
-        new_data += "},";
-    }
-
-    new_data += "]}";
-    return new_data;
-}
-
-/* function is a slot connected with the signal from Client::handshake()
- function is called after a succesful handshake was done. */
-void MsgDistributor::connectApp(Client *c)
-{
-    // give an unique id
-    c->uid = this->getNewUid();
-
-    // remove c from u_clients
-    this->u_clients.removeOne(c);
-
-    // add c to cc_clients
-    this->cc_clients[c->getId()].append(c);
-
-    // connect c to the msgdistributor.
-    connect(c, &Client::textMessageReceived, this, &MsgDistributor::processTextMessages);
-
-    qDebug() << "MsgDistributor::connectApp" << c->getId() << c->appType() << "Ready to process data";
-    c->sendTextMessage("HANDSHAKE_SUCCESS " + QString::number(c->uid));
+    foreach( int uid, this->sorted_uids[origin->getId()])
+        if (this->cc_clients[uid]->uid != origin->uid && this->cc_clients[uid]->appType() != origin->appType()) this->cc_clients[uid]->sendTextMessage(message);
 }
 
 // process text messages and send them to the correct targets
@@ -132,25 +71,3 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
     else
         qDebug() << "invalid message:" << message;
 }
-
-// handles the disconnects
-void MsgDistributor::onDisconnect(Client *c)
-{
-    if (c->awaiting_handshake()){
-        // remove client from u_clients
-        this->u_clients.removeOne(c);
-        qDebug() << "Client without handshake disconnected"; // TODO MOVE TO CLIENT
-    }else{
-        qDebug() << "Client Disconnected" << c->getId(); // TODO MOVE TO CLIENT
-        // remove uid from the uid taken list
-        this->uid_taken.removeOne(c->uid);
-        // remove from cc_clients
-        //this->cc_clients[c->getId()].removeOne(c); // TODO FIX, segmentation errors
-        QMutableListIterator<Client*> l(this->cc_clients[c->getId()]);
-        while(l.hasNext()){
-            if (l.next()->uid == c->uid)
-                l.remove();
-        }
-    }
-}
-

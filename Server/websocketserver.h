@@ -7,6 +7,7 @@
 #include <QtNetwork/QSslError>
 #include "msgdistributor.h"
 #include "client.h"
+#include "clientmanager.h"
 
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -15,7 +16,7 @@ class WebsocketServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit WebsocketServer(MsgDistributor *ms, QObject *parent = nullptr);
+    explicit WebsocketServer(ClientManager *cm, QObject *parent = nullptr);
     ~WebsocketServer() override;
 
 private Q_SLOTS:
@@ -24,7 +25,8 @@ private Q_SLOTS:
 
 private:
     QWebSocketServer *websocketServer;
-    MsgDistributor *msg_dist;
+    //MsgDistributor *msg_dist;
+    ClientManager *cm;
 
 signals:
 

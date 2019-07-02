@@ -53,7 +53,7 @@ void ClientManager::onDisconnect(Client *c)
         int d_uid = c->uid; // TODO REMOVE AFTER DEBUGGING
         // remove from cc_clients
         this->u_clients[c->uid] = nullptr; // TODO FIX, segmentation errors
-        this->u_clients.remove(c->uid);
+        //this->u_clients.remove(c->uid);
         if (this->uidTaken(d_uid))
             qDebug() << "UID IS STILL TAKEN AFTER DISCONNECT, FIX IT";
         else {

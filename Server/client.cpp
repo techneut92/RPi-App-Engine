@@ -20,7 +20,8 @@ Client::Client(QWebSocket *cl, QObject *parent) : QObject(parent)
 // destructor makes sure the connection is closed and deleted.
 Client::~Client()
 {
-    this->ws_client->close();
+    if (this->ws_client->isValid())
+        this->ws_client->close();
     this->ws_client = nullptr;
 }
 

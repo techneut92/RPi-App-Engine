@@ -4,8 +4,17 @@
 ClientManager::ClientManager(MsgDistributor *md, QObject *parent) : QObject(parent)
 {
     this->msgDistributor = md;
-    this->msgDistributor->setCcClients(&this->cc_clients);
-    this->msgDistributor->setSortedUids(&this->sorted_uids);
+    this->msgDistributor->setServer(this);
+}
+
+QMap<int, Client *> ClientManager::getClients()
+{
+    return this->cc_clients;
+}
+
+QMap<QString, QList<int> > ClientManager::getSortedClients()
+{
+    return this->sorted_uids;
 }
 
 void ClientManager::appendClient(Client *c)
@@ -51,7 +60,9 @@ void ClientManager::onDisconnect(Client *c)
     }else{
         qDebug() << "Client Disconnected" << c->getId() << c->uid << c->getOrigin();
         int d_uid = c->uid;
+        qDebug() << "cc_clients contains uid key:" << this->cc_clients.keys().contains(c->uid);
         this->cc_clients.remove(c->uid); // TODO FIX, segmentation errors??
+
         QMutableListIterator<int> i(this->sorted_uids[c->getId()]);
         while (i.hasNext()) {
             if (i.next() == c->uid)

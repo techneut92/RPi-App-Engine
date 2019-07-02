@@ -13,7 +13,8 @@ class ClientManager : public QObject
     Q_OBJECT
 public:
     explicit ClientManager(MsgDistributor *md, QObject *parent = nullptr);
-
+    QMap<int, Client*> getClients();
+    QMap<QString, QList<int>> getSortedClients();
     void appendClient(Client* c);
 
 private:

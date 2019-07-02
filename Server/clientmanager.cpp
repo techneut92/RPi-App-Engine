@@ -62,12 +62,9 @@ void ClientManager::onDisconnect(Client *c)
             if (i.next() == c->uid)
                 i.remove();
         }
-        qDebug() << "action 1";
         if (this->sorted_uids[c->getId()].count() == 0)
             this->sorted_uids.remove(c->getId());
-        qDebug() << "action 2";
         delete c;
-        qDebug() << "action 7";
     }
 }
 

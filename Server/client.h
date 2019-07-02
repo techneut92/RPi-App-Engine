@@ -45,7 +45,6 @@ private:
     bool handshake_succes = false;                  // Registers if the handshake was done succesfully.
     ConnectionType con_type;                        // currently always set to websocket, is there in case of expansion to tcp connections.
     AppType app_type = UnkownType;                  // Will contain the apptype if it's either a client or server type.
-    bool ws_client_deleted = false;
 
 private Q_SLOTS:
     void processTextMessage(QString message);       // Captures text messages from the websocket
@@ -55,10 +54,10 @@ private Q_SLOTS:
     void falseHandshake(QByteArray message);        // Function to capture binary data before the handshake occured
 
 signals:
-    void handshake_succesful(Client *c);                                             // Signal to send when the handshake was succesful sending this client as an object
+    void handshake_succesful(Client *c);                           // Signal to send when the handshake was succesful sending this client as an object
     void textMessageReceived(QString message, Client* c);          // Signal to send any received text messages
     void binaryMessageReceived(QByteArray message, Client* c);     // Signal to send any received binary messages
-    void disconnected(Client *c);                                                    // Signal when client disconnects
+    void disconnected(Client *c);                                  // Signal when client disconnects
 
 public slots:
 };

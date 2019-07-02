@@ -47,20 +47,19 @@ void ClientManager::connectApp(Client *c)
 
 void ClientManager::onDisconnect(Client *c)
 {
-    qDebug() << "awaiting handshake" << c->awaiting_handshake();
     if (c->awaiting_handshake()){
-        qDebug() << "Client without handshake disconnected" << c->uid << c->getOrigin();
+        qDebug() << "Client without handshake disconnected" << c->uid;
         int d_uid = c->uid; // TODO REMOVE AFTER DEBUGGING
         // remove from cc_clients
         this->u_clients[c->uid] = nullptr; // TODO FIX, segmentation errors
-        //this->u_clients.remove(c->uid);
+        this->u_clients.remove(c->uid);
         if (this->uidTaken(d_uid))
             qDebug() << "UID IS STILL TAKEN AFTER DISCONNECT, FIX IT";
         else {
             qDebug() << "SUCCESFULLY REMOVED UID AFTER DISCONNECT, REMOVE DEBUGS";
         }
     }else{
-        qDebug() << "Client Disconnected" << c->getId() << c->uid << c->getOrigin();
+        qDebug() << "Client Disconnected" << c->getId() << c->uid;
         int d_uid = c->uid;
         qDebug() << "cc_clients contains uid key:" << this->cc_clients.keys().contains(c->uid);
         this->cc_clients.remove(c->uid); // TODO FIX, segmentation errors??

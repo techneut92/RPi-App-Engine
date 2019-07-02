@@ -51,7 +51,7 @@ void ClientManager::onDisconnect(Client *c)
         qDebug() << "Client without handshake disconnected" << c->uid << c->getOrigin();
         int d_uid = c->uid; // TODO REMOVE AFTER DEBUGGING
         // remove from cc_clients
-        this->u_clients.remove(c->uid); // TODO FIX, segmentation errors
+        delete this->u_clients[c->uid]; // TODO FIX, segmentation errors
         if (this->uidTaken(d_uid))
             qDebug() << "UID IS STILL TAKEN AFTER DISCONNECT, FIX IT";
         else {
@@ -120,8 +120,6 @@ QString ClientManager::getClientsPackage(QString id, int ruid)
 
     QJsonDocument  json(mainObject);
     QString jsonString = json.toJson();
-    jsonString.remove("\n");
-    jsonString.remove(' ');
     return this->genPackage(jsonString);
 }
 
@@ -138,5 +136,9 @@ QString ClientManager::genPackage(QString message)
     mainObject.insert("msgData", message);
 
     QJsonDocument doc(mainObject);
-    return doc.toJson();
+    QString jsonString = doc.toJson();
+    jsonString.remove("\n");
+    jsonString.remove(' ');
+    jsonString.remove("\\");
+    return jsonString;
 }

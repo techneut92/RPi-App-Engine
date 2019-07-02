@@ -4,8 +4,8 @@
 ClientManager::ClientManager(MsgDistributor *md, QObject *parent) : QObject(parent)
 {
     this->msgDistributor = md;
-    this->msgDistributor->setCcClients(this->cc_clients);
-    this->msgDistributor->setSortedUids(this->sorted_uids);
+    this->msgDistributor->setCcClients(&this->cc_clients);
+    this->msgDistributor->setSortedUids(&this->sorted_uids);
 }
 
 void ClientManager::appendClient(Client *c)

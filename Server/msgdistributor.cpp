@@ -12,14 +12,14 @@ MsgDistributor::~MsgDistributor()
 
 }
 
-void MsgDistributor::setCcClients(QMap<int, Client *> &c)
+void MsgDistributor::setCcClients(QMap<int, Client *> *c)
 {
-    this->cc_clients = c;
+    this->cc_clients = *c;
 }
 
-void MsgDistributor::setSortedUids(QMap<QString, QList<int> > &su)
+void MsgDistributor::setSortedUids(QMap<QString, QList<int> > *su)
 {
-    this->sorted_uids = su;
+    this->sorted_uids = *su;
 }
 
 // Function to relay messages to specific client groups

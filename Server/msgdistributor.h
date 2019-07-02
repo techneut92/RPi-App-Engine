@@ -12,8 +12,8 @@ class MsgDistributor : public QObject
 public:
     explicit MsgDistributor(QObject *parent = nullptr);
     ~MsgDistributor() override;
-    void setCcClients(QMap<int, Client *> &c);
-    void setSortedUids(QMap<QString, QList<int> > &su);
+    void setCcClients(QMap<int, Client *> *c);
+    void setSortedUids(QMap<QString, QList<int> > *su);
 
 private:
     void relayMessage(QString message, Client* origin, QVariantMap jmap);

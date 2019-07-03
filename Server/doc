@@ -21,7 +21,6 @@ server send json:
             "peerAddress": string -- the address from where the origin connected.
             "appType": string -- the app type of the origin
             }
-    //"action": "getClients" -- gives back all the connected clients. send to new connections and as notification to others
     "msgData": string -- a string that contains the message
 }
 
@@ -38,4 +37,6 @@ server action "getClients" json format
                             "peerOrigin": string -- origin of where the socket connected (usually the website url)
                             "peerAddress": string -- the address from where the client connected.
                             "appType": string -- the app type of the client
-                        ]}
+                        ], [...], ...}
+            }
+}

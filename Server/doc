@@ -40,3 +40,20 @@ server action "getClients" json format
                         ], [...], ...}
             }
 }
+
+server action "newClient" json format
+{
+    "originName": "server"
+    "msgData": string -- this is send as a string, should be converted to json again (probably)
+            {
+                "action": "newClient"
+                "client": {
+                            "uid": int -- contains the clients uid
+                            "appId": string -- contains the app ID. (currently) this should always be the same as the recipients
+                            "peerName": string -- not sure what this is. comes from the websocket
+                            "peerOrigin": string -- origin of where the socket connected (usually the website url)
+                            "peerAddress": string -- the address from where the client connected.
+                            "appType": string -- the app type of the client
+                        }
+            }
+}

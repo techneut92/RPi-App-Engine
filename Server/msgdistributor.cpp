@@ -25,7 +25,6 @@ void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap j
     QMap<QString, QList<int>> sorted_uids = this->cm->getSortedClients();
     if (jmap["serverTarget"].toString() == "all"){
         // iterate through all clients with the same id and send a message to all client types except the origin
-        //this->sorted_uids[""].append(1);
         foreach(int uid, sorted_uids[origin->getId()])
             if (uid != origin->uid) cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
@@ -44,9 +43,6 @@ void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap j
     else if(jmap["serverTarget"].toString() == "uid"){
         int uid = jmap["uid"].toInt();
         cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
-        //foreach( int uid, sorted_uids[origin->getId()])
-        //    if (cc_clients[uid]->uid != origin->uid && cc_clients[uid]->appType() == AppType::WebClient)
-        //       cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
     else if (jmap["serverTarget"].toString() == "server"){
         //this->serverCommandManager(origin, jmap);

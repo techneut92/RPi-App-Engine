@@ -1,0 +1,41 @@
+server accepts json:
+{
+    "serverTarget": "uid" -- specific uid has to be give
+    "serverTarget": "clientApp" -- send to all webclients with the same app ID
+    "serverTarget": "serverApp" -- send to all server Apps with the same ID
+    "serverTarget": "all" -- sends the message to all server and client apps
+    "serverTarget": non-existant -- will send the message to all clients that do NOT share the same app type
+    "uid": int -- if the "serverTarget" == "uid" then this is mandatory as the target
+    "msgData": string -- contains the message to be send.
+    "msgData": non-existant -- can only be left out if the serverTarget is also non-existant
+}
+
+server send json:
+{
+    "originName": "server" -- messages from the server itself
+    "origin": { -- contains an object of the origin from where the message was send
+            "uid": int -- contains the origins uid
+            "appId": string -- contains the app ID. (currently) this should always be the same as the recipients
+            "peerName": string -- not sure what this is. comes from the websocket
+            "peerOrigin": string -- origin of where the socket connected (usually the website url)
+            "peerAddress": string -- the address from where the origin connected.
+            "appType": string -- the app type of the origin
+            }
+    //"action": "getClients" -- gives back all the connected clients. send to new connections and as notification to others
+    "msgData": string -- a string that contains the message
+}
+
+server action "getClients" json format
+{
+    "originName": "server"
+    "msgData": string -- this is send as a string, should be converted to json again (probably)
+            {
+                "action": "getClients"
+                "clients": {[
+                            "uid": int -- contains the clients uid
+                            "appId": string -- contains the app ID. (currently) this should always be the same as the recipients
+                            "peerName": string -- not sure what this is. comes from the websocket
+                            "peerOrigin": string -- origin of where the socket connected (usually the website url)
+                            "peerAddress": string -- the address from where the client connected.
+                            "appType": string -- the app type of the client
+                        ]}

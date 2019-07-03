@@ -36,5 +36,6 @@ HEADERS += \
     websocketserver.h
 
 DISTFILES += \
+    doc \
     server.ini \
     todo

@@ -100,11 +100,13 @@ QString ClientManager::getClientsPackage(QString id, int ruid)
         if (ruid < 0 || (ruid >= 0 && ruid != uid)){
             QJsonObject t_object;
             t_object.insert("uid", QJsonValue::fromVariant(uid));
+            t_object.insert("appId", QJsonValue::fromVariant(this->cc_clients[uid]->getId()));
             t_object.insert("peerName", QJsonValue::fromVariant(this->cc_clients[uid]->getPeerName()));
             t_object.insert("peerAddress", QJsonValue::fromVariant(this->cc_clients[uid]->getPeerAddress()));
-            t_object.insert("origin", QJsonValue::fromVariant(this->cc_clients[uid]->getOrigin()));
+            t_object.insert("peerOrigin", QJsonValue::fromVariant(this->cc_clients[uid]->getOrigin()));
             if (this->cc_clients[uid]->appType() == AppType::Server) t_object.insert("appType", QJsonValue::fromVariant("serverApp"));
             else if(this->cc_clients[uid]->appType() == AppType::WebClient) t_object.insert("appType", QJsonValue::fromVariant("clientApp"));
+            else if(this->cc_clients[uid]->appType() == AppType::UnkownType) t_object.insert("appType", QJsonValue::fromVariant("unkownType"));
             clientsArray.push_back(t_object);
         }
     }

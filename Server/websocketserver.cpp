@@ -67,7 +67,7 @@ void WebsocketServer::onNewConnection()
 {
     QWebSocket *pSocket = websocketServer->nextPendingConnection();
 
-    qDebug() << "Client connected:" << pSocket->peerAddress().toIPv4Address() << pSocket->origin();
+    qDebug() << "Client connected:" << pSocket->peerAddress().toString() << pSocket->origin();
 
     this->cm->appendClient(new Client(pSocket));
 }

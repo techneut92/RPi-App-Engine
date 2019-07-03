@@ -99,7 +99,6 @@ QString MsgDistributor::genPackage(Client *origin, QString msg)
 // process text messages and send them to the correct targets
 void MsgDistributor::processTextMessages(QString message, Client* origin)
 {
-    qDebug() << "message received from uid:" << origin->uid << "msg:" << message;
     if (jsonHandler::isValidJson(message)){
         QVariantMap jmap = jsonHandler::jsonStringToQMap(message);
         if (!jmap["serverTarget"].isNull())

@@ -114,12 +114,9 @@ QString ClientManager::getClientsPackage(QString id, int excluded_uid)
 QString ClientManager::getClientsPackage(int uid)
 {
     QJsonObject  mainObject;
-    QJsonArray clientsArray;
 
     mainObject.insert("action", QJsonValue::fromVariant("initSelf"));
-
-    clientsArray.push_back(this->getClientJsonObject(this->cc_clients[uid]));
-    mainObject.insert("self", clientsArray);
+    mainObject.insert("self", this->getClientJsonObject(this->cc_clients[uid]));
 
     QJsonDocument  json(mainObject);
     QString jsonString = json.toJson();
@@ -134,7 +131,6 @@ QString ClientManager::getClientsPackage(QString id)
 void ClientManager::notifyOthersNewClient(Client *new_client)
 {
     QJsonObject  mainObject;
-    QJsonArray clientsArray;
 
     mainObject.insert("action", QJsonValue::fromVariant("newClient"));
     mainObject.insert("client", this->getClientJsonObject(new_client));

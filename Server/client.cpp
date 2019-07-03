@@ -106,7 +106,7 @@ void Client::handshake(QString message)
         if (!jsonMap.isEmpty() && !jsonMap["id"].isNull() && !jsonMap["appType"].isNull()){
             // means the data was valid
             this->id = jsonMap["id"].toString();
-            if (jsonMap["appType"].toString() == "webClient") this->app_type = AppType::WebClient;
+            if (jsonMap["appType"].toString() == "clientApp") this->app_type = AppType::WebClient;
             else if (jsonMap["appType"].toString() == "serverApp") this->app_type = AppType::Server;
             //if (!jsonMap["uid"].isNull()) this->uid = jsonMap["uid"].toString();
 

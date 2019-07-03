@@ -65,10 +65,8 @@ void MsgDistributor::relayMessage(QString message, Client *origin)
 {
     QMap<int, Client*> cc_clients = this->cm->getClients();
     QMap<QString, QList<int>> sorted_uids = this->cm->getSortedClients();
-    qDebug() << "started relayMessage with msg:" << message;
     foreach( int uid, sorted_uids[origin->getId()])
         if (cc_clients[uid]->uid != origin->uid && cc_clients[uid]->appType() != origin->appType()) {
-            qDebug() << "trying to send msg to uid:" << uid;
             cc_clients[uid]->sendTextMessage(this->genPackage(origin, message));
         }
 }
@@ -88,7 +86,7 @@ QString MsgDistributor::genPackage(Client *origin, QString msg)
     else if (origin->appType() == AppType::Server)
         originClient.insert("appType", QJsonValue::fromVariant("serverClient"));
     else if (origin->appType() == AppType::UnkownType)
-        originClient.insert("appType", QJsonValue::fromVariant("unkownType"));
+        originClient.insert("appType", QJsonValue::fromVariant("unknownType"));
 
     mainobject.insert("origin", originClient);
     mainobject.insert("msgData", msg);
@@ -101,6 +99,7 @@ QString MsgDistributor::genPackage(Client *origin, QString msg)
 // process text messages and send them to the correct targets
 void MsgDistributor::processTextMessages(QString message, Client* origin)
 {
+    qDebug() << "message received from uid:" << origin->uid << "msg:" << message;
     if (jsonHandler::isValidJson(message)){
         QVariantMap jmap = jsonHandler::jsonStringToQMap(message);
         if (!jmap["serverTarget"].isNull())

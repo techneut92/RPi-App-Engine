@@ -1,62 +1,67 @@
 import websocket
 import json
+from _peer import Peer
 
 
-class RpaeApp:
+class RpaeApp(Peer):
+    __host = None  # holds the host address
+    __ws = None  # the websocket
+    __connected = False  # bool to show if host is connected
+    __isReady = False  # will set to true once the handshake is done
+    __queue = []  # queue to catch all messages during an handshake.
+    __appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid']
+    __peers = {}
+
     def __init__(self, aid, host="ws://localhost:9738"):
-        self._id = aid                # the app id, when inheriting should be set
-        self._uid = None            # the unique connection id. is set when the handshake is successful
-        self._host = host           # the websocket's host. when set it tries to connect and set self._ws
-        self._ws = None             # the websocket
-        self._connected = False     # bool to show if host is connected
-        self._isReady = False       # will set to true once the handshake is done
-        self._queue = []            # queue to catch all messages during an handshake.
-        self._appTypes = ['all', 'clientApp', 'serverApp', 'all', 'uid']
-        self._peers = []
+        super().__init__()
+        self._setAppID(aid)         # the app id, when inheriting should be set
+        self.___host = host         # the websocket's host. when set it tries to connect and set self._ws
 
     # Handshake has to occur before data can be transmitted
-    def _handshake(self, message):
+    def __handshake(self, message):
         if message == "HANDSHAKE":
             print("Starting handshake with server")
-            self._ws.send(json.dumps({
-                'id': self.id,
+            self.__ws.send(json.dumps({
+                'id': self.appID,
                 'appType': 'serverApp'
             }))
         elif message.startswith("HANDSHAKE_SUCCES"):
+            self.__isReady = True
             message = message.split(' ')
-            self._uid = int(message[1])
-            self._handleServerMessages(message[2])
-            self._isReady = True
+            self.__onMessage(message[1])
+            self.__onMessage(message[2])
             print("handshake successful!")
             self.onOpen()
-            [self._onMessage(m) for m in self._queue]
+            [self.__onMessage(m) for m in self.__queue]
         elif message.startswith("HANDSHAKE_FAILURE"):
-            self._onError(message)
+            self.__onError(message)
         else:
-            print("msg queued")
-            self._queue.append(message)
+            self.__queue.append(message)
 
     # create a package to send over the server
     @staticmethod
-    def _createPackage(message, target='clientApp', uidTarget=None):
-        package = json.dumps({
+    def __createPackage(message, target='clientApp', uidTarget=None):
+        package = {
             'serverTarget': target,
             'msgData': message
-        })
-        if target is not 'clientApp':
+        }
+        if target != 'clientApp':
             package["serverTarget"] = target
-        elif uidTarget is not None and target == 'uid':
-            package["uid"] = uidTarget
-        elif target == 'uid' and uidTarget is None:
-            print("ERROR: trying to send message to specific uid but no uid is given")
-            return None
-        return package
+            if uidTarget is not None and target == 'uid':
+                package['uid'] = uidTarget
+            elif target == 'uid' and uidTarget is None:
+                print("ERROR: trying to send message to specific uid but no uid is given")
+                return None
+        return json.dumps(package)
 
     # sends a message to other peers
     def sendMessage(self, message, appType='clientApp', uidTarget=None):
-        msgData = self._createPackage(message, target=appType, uidTarget=uidTarget)
+        msgData = self.__createPackage(message, target=appType, uidTarget=uidTarget)
         if msgData is not None:
-            self._ws.send()
+            self.__ws.send(msgData)
+
+    def init(self):
+        pass
 
     # Receives messages after handshake is complete, should be overwritten
     def onMessage(self, message, origin):
@@ -71,29 +76,44 @@ class RpaeApp:
         pass
 
     # public function for when a new client connects
-    def onNewClient(self, client):
+    def onNewPeer(self, peer):
+        pass
+
+    def onPeerDisconnected(self, peer):
         pass
 
     # start the server thread
     def start(self):
-        self._ws.run_forever()
+        self.init()
+        self.__ws.run_forever()
 
-    def _handleServerMessages(self, message):
+    def __handleServerMessages(self, message):
         try:
             message = json.loads(message)
         except ValueError:
             print("received message from server not json")
             return
         if message["action"] == 'newClient':
-            self._peers.append(message['client'])
-            self.onNewClient(message['client'])
+            self.__onNewPeer(message['client'])
+        elif message['action'] == 'initSelf':
+            self._updateSelf(message['self'])
         elif message['action'] == 'getClients':
-            self._peers = message['clients']
+            self.__peers = self.__serverGetClients(message['clients'])
+        elif message['action'] == 'clientDisconnected':
+            self.__onPeerDisconnected(message['clientUid'])
+
+    @staticmethod
+    def __serverGetClients(clientDict):
+        new_dict = {}
+        for client in clientDict:
+            p = Peer(clientDict=client)
+            new_dict[p.uid] = p
+        return new_dict
 
     # private onMessage function
-    def _onMessage(self, message):
-        if not self._isReady:
-            self._handshake(message)
+    def __onMessage(self, message):
+        if not self.__isReady:
+            self.__handshake(message)
         else:
             try:
                 message = json.loads(message)
@@ -101,66 +121,61 @@ class RpaeApp:
                 print("received message not json")
                 return
             if 'originName' in message and message['originName'] == "server":
-                self._handleServerMessages(message['msgData'])
+                self.__handleServerMessages(message['msgData'])
             else:
-                print(type(message['msgData']))
                 self.onMessage(message["msgData"], message["origin"])
 
     # sets connected to true once the websocket opens
-    def _onOpen(self):
-        self._connected = True
+    def __onOpen(self):
+        self.__connected = True
 
     # private onError function
-    def _onError(self, error):
+    def __onError(self, error):
         print(error)
+
         self.onError(error)
 
     # private function of on new client, adds it to the program and executes the public one
-    def _onNewClient(self, data):
-        client = data
-        self.onNewClient(client)
+    def __onNewPeer(self, peer):
+        p = Peer(clientDict=peer)
+        self.__peers[p.uid] = p
+        self.onNewPeer(p)
+
+    def __onPeerDisconnected(self, clientUid):
+        self.onPeerDisconnected(self.__peers.pop(int(clientUid), None))
 
     # getter for host
     @property
     def host(self):
-        return self._host
+        return self.__host
 
     @property
-    def _host(self):
-        return self._host
+    def ___host(self):
+        return self.__host
 
     # setter for host, automatically tries to connect to the server
-    @_host.setter
-    def _host(self, value):
-        if self._connected:
-            self._ws.close()
-            del self._ws
-        self._ws = websocket.WebSocketApp(value, on_message=self._onMessage,
-                                          on_error=self._onError, on_open=self._onOpen)
-        self._host = value
+    @___host.setter
+    def ___host(self, value):
+        if self.__connected:
+            self.__ws.close()
+            del self.__ws
+        self.__ws = websocket.WebSocketApp(value, on_message=self.__onMessage,
+                                           on_error=self.__onError, on_open=self.__onOpen)
+        self.__host = value
 
     # getter for connected, is true if connected to server before handshake
     @property
     def connected(self):
-        return self._connected
-
-    # getter for uid, should never be changed
-    @property
-    def uid(self):
-        return self._uid
+        return self.__connected
 
     @property
     def isReady(self):
-        return self._isReady
+        return self.__isReady
 
     @property
     def appTypes(self):
-        return self._appTypes
-
-    @property
-    def id(self):
-        return self._id
+        return self.__appTypes
 
     @property
     def peers(self):
-        return self._peers
+        return self.__peers

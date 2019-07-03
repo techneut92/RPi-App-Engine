@@ -45,7 +45,7 @@ void ClientManager::connectApp(Client *c)
                        QString::number(c->uid) +
                        " " +
                        this->getClientsPackage(c->getId(), c->uid));
-    c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
+    //c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
     this->notifyOthers(c);
 }
 

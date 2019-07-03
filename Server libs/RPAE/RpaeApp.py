@@ -11,10 +11,9 @@ class RpaeApp:
         self._connected = False     # bool to show if host is connected
         self._isReady = False       # will set to true once the handshake is done
         self._queue = []            # queue to catch all messages during an handshake.
-        self._appTypes = ['serverApp', 'clientApp']
+        self._appTypes = ['all', 'clientApp', 'serverApp', 'all', 'uid']
         self.host = host
         self._peers = []
-        self._appTypes = ['all', 'clientApp', 'serverApp', 'all', 'uid']
 
     # Handshake has to occur before data can be transmitted
     def _handshake(self, message):
@@ -27,7 +26,6 @@ class RpaeApp:
         elif message.startswith("HANDSHAKE_SUCCES"):
             message = message.split(' ')
             self._uid = int(message[1])
-            self.onOpen()
             self._isReady = True
             [self._onMessage(m) for m in self._queue]
         elif message.startswith("HANDSHAKE_FAILURE"):
@@ -58,13 +56,6 @@ class RpaeApp:
         if msgData is not None:
             self._ws.send()
 
-    #  _serverSend(self, action):
-    #    package = json.dumps({
-    #        'serverTarget': 'serverConsole',
-    #        'action': action
-    #    })
-    #    self._ws.send(package)
-
     # Receives messages after handshake is complete, should be overwritten
     def onMessage(self, message, origin):
         pass
@@ -77,11 +68,25 @@ class RpaeApp:
     def onError(self, error):
         pass
 
+    # public function for when a new client connects
     def onNewClient(self, client):
         pass
 
+    # start the server thread
     def start(self):
         self._ws.run_forever()
+
+    def _handleServerMessages(self, message):
+        try:
+            message = json.loads(message)
+        except ValueError:
+            print("received message not json")
+            return
+        if message["action"] is "newClient":
+            self._peers.append(message['client'])
+            self.onNewClient(message['client'])
+        elif message['action'] is "getClients":
+            self._peers = message["clients"]
 
     # private onMessage function
     def _onMessage(self, message):
@@ -95,9 +100,7 @@ class RpaeApp:
                 # self.onMessage(message, None)
                 return
             if message["originName"] == "server":
-                print(message['msgData'])
-                print(type(message['msgData']))
-                # TODO CREATE FUNCTION OR CLASS TO HANDLE THIS
+                self._handleServerMessages(message['msgData'])
             else:
                 print(type(message['msgData']))
                 self.onMessage(message["msgData"], message["origin"])
@@ -105,6 +108,7 @@ class RpaeApp:
     # sets connected to true once the websocket opens
     def _onOpen(self):
         self._connected = True
+        self.onOpen()
 
     # private onError function
     def _onError(self, error):
@@ -154,5 +158,5 @@ class RpaeApp:
         return self._id
 
     @property
-    def appTypes(self):
-        return self._appTypes
+    def peers(self):
+        return self._peers

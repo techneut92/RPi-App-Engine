@@ -137,9 +137,6 @@ QString ClientManager::genPackage(QString message)
 
     QJsonDocument doc(mainObject);
     QString jsonString = doc.toJson();
-    //jsonString.remove('\n');
-    //jsonString.remove(' ');
-    //jsonString.replace("\\\"", "\"");
     return jsonString;
 }
 

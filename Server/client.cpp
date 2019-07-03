@@ -98,7 +98,7 @@ void Client::socketDisconnected()
 void Client::handshake(QString message)
 {
     // process handshake data
-    qDebug() << "Handshake started:" << message;
+    qDebug() << "Handshake started for uid:" << this->uid;
 
     // convert json to qvariantmap
     if (jsonHandler::isValidJson(message)) {

@@ -16,13 +16,15 @@ class ExampleApp(RpaeApp):
 
     # executes when the connection is made and the handshake was successful
     def onOpen(self):
-        pass
+        print("my uid: ", self.uid)
 
     # executes when a new clients is connected
     def onNewClient(self, client):
-        pass
+        print(client)
+        print(self.peers)
 
 
+# The main function to start the app
 if __name__ == "__main__":
-    app = ExampleApp()
-    ExampleApp().start()
+    app = ExampleApp()      # First create an object of your app
+    ExampleApp().start()    # Connect to the server and start listening

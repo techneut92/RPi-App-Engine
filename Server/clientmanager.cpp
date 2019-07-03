@@ -124,7 +124,8 @@ void ClientManager::notifyOthers(Client *new_client)
     QString jsonString = json.toJson();
     QString msg = this->genPackage(jsonString);
     foreach (int target, this->sorted_uids[new_client->getId()])
-        this->cc_clients[target]->sendTextMessage(msg);
+        if (new_client->uid != target)
+            this->cc_clients[target]->sendTextMessage(msg);
 }
 
 QString ClientManager::genPackage(QString message)
@@ -136,9 +137,9 @@ QString ClientManager::genPackage(QString message)
 
     QJsonDocument doc(mainObject);
     QString jsonString = doc.toJson();
-    jsonString.remove('\n');
-    jsonString.remove(' ');
-    jsonString.replace("\\\"", "\"");
+    //jsonString.remove('\n');
+    //jsonString.remove(' ');
+    //jsonString.replace("\\\"", "\"");
     return jsonString;
 }
 

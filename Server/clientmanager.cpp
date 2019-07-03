@@ -46,7 +46,7 @@ void ClientManager::connectApp(Client *c)
                        " " +
                        this->getClientsPackage(c->getId(), c->uid).replace(" ", ""));
     //c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
-    this->notifyOthers(c);
+    this->notifyOthersNewClient(c);
 }
 
 void ClientManager::onDisconnect(Client *c)
@@ -58,6 +58,7 @@ void ClientManager::onDisconnect(Client *c)
         this->u_clients.remove(c->uid);
     }else{
         qDebug() << "Client Disconnected" << c->getId() << c->uid;
+        this->notifyOthersClientDisconnected(c);
         disconnect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
         this->cc_clients.remove(c->uid); // TODO FIX, segmentation errors??
 
@@ -115,7 +116,7 @@ QString ClientManager::getClientsPackage(QString id)
     return this->getClientsPackage(id, -1);
 }
 
-void ClientManager::notifyOthers(Client *new_client)
+void ClientManager::notifyOthersNewClient(Client *new_client)
 {
     QJsonObject  mainObject;
     QJsonArray clientsArray;
@@ -128,6 +129,22 @@ void ClientManager::notifyOthers(Client *new_client)
     QString msg = this->genPackage(jsonString);
     foreach (int target, this->sorted_uids[new_client->getId()])
         if (new_client->uid != target)
+            this->cc_clients[target]->sendTextMessage(msg);
+}
+
+void ClientManager::notifyOthersClientDisconnected(Client *c)
+{
+    QJsonObject  mainObject;
+    QJsonArray clientsArray;
+
+    mainObject.insert("action", QJsonValue::fromVariant("clientDisconnected"));
+    mainObject.insert("clientUid", c->uid);
+
+    QJsonDocument json(mainObject);
+    QString jsonString = json.toJson();
+    QString msg = this->genPackage(jsonString);
+    foreach (int target, this->sorted_uids[c->getId()])
+        if (c->uid != target)
             this->cc_clients[target]->sendTextMessage(msg);
 }
 

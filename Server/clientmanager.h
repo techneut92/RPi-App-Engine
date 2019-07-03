@@ -32,7 +32,8 @@ private:
     bool uidTaken(int uid);
     QString getClientsPackage(QString id, int excluded_uid);
     QString getClientsPackage(QString id);
-    void notifyOthers(Client* new_client);
+    void notifyOthersNewClient(Client* new_client);
+    void notifyOthersClientDisconnected(Client *c);
     QString genPackage(QString message);
     QJsonObject getClientJsonObject(Client *c);
 

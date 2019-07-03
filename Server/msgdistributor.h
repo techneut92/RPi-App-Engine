@@ -17,9 +17,11 @@ public:
     void setServer(ClientManager *c);
 
 private:
+    ClientManager *cm;
+
     void relayMessage(QString message, Client* origin, QVariantMap jmap);
     void relayMessage(QString message, Client* origin);
-    ClientManager *cm;
+    QString genPackage(Client *origin, QString msg);
 
 private Q_SLOTS:
 

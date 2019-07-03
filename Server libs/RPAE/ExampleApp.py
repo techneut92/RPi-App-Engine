@@ -16,12 +16,13 @@ class ExampleApp(RpaeApp):
 
     # executes when the connection is made and the handshake was successful
     def onOpen(self):
-        print("my uid: ", self.uid)
+        print("my app ID:", self.id)
+        print("my uid:", self.uid)
+        print("number of connected peers", self.peers.count())
 
     # executes when a new clients is connected
     def onNewClient(self, client):
         print(client)
-        print(self.peers)
 
 
 # The main function to start the app

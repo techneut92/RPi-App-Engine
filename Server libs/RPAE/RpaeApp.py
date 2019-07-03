@@ -27,6 +27,7 @@ class RpaeApp:
             message = message.split(' ')
             self._uid = int(message[1])
             self._isReady = True
+            self.onOpen()
             [self._onMessage(m) for m in self._queue]
         elif message.startswith("HANDSHAKE_FAILURE"):
             self._onError(message)
@@ -43,9 +44,9 @@ class RpaeApp:
         })
         if target is not 'clientApp':
             package["serverTarget"] = target
-        elif uidTarget is not None and target is 'uid':
+        elif uidTarget is not None and target == 'uid':
             package["uid"] = uidTarget
-        elif target is 'uid' and uidTarget is None:
+        elif target == 'uid' and uidTarget is None:
             print("ERROR: trying to send message to specific uid but no uid is given")
             return None
         return package
@@ -80,13 +81,13 @@ class RpaeApp:
         try:
             message = json.loads(message)
         except ValueError:
-            print("received message not json")
+            print("received message from server not json")
             return
-        if message["action"] is "newClient":
+        if message["action"] == 'newClient':
             self._peers.append(message['client'])
             self.onNewClient(message['client'])
-        elif message['action'] is "getClients":
-            self._peers = message["clients"]
+        elif message['action'] == 'getClients':
+            self._peers = message['clients']
 
     # private onMessage function
     def _onMessage(self, message):
@@ -108,7 +109,6 @@ class RpaeApp:
     # sets connected to true once the websocket opens
     def _onOpen(self):
         self._connected = True
-        self.onOpen()
 
     # private onError function
     def _onError(self, error):

@@ -101,5 +101,6 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
             relayMessage(message, origin);
     }
     else
-        qDebug() << "invalid message:" << message;
+        relayMessage(message, origin);
+        //qDebug() << "invalid message:" << message;
 }

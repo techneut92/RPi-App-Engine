@@ -42,7 +42,7 @@ void ClientManager::connectApp(Client *c)
 
     qDebug() << "app" << c->getId() << "uid:" << c->uid << "Ready to process data";
     c->sendTextMessage("HANDSHAKE_SUCCESS " +
-                       QString::number(c->uid) +
+                       this->getClientsPackage(c->uid).replace(" ", "") +
                        " " +
                        this->getClientsPackage(c->getId(), c->uid).replace(" ", ""));
     //c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
@@ -105,6 +105,21 @@ QString ClientManager::getClientsPackage(QString id, int excluded_uid)
         if (excluded_uid < 0 || (excluded_uid >= 0 && excluded_uid != uid))
             clientsArray.push_back(this->getClientJsonObject(this->cc_clients[uid]));
     mainObject.insert("clients", clientsArray);
+
+    QJsonDocument  json(mainObject);
+    QString jsonString = json.toJson();
+    return this->genPackage(jsonString);
+}
+
+QString ClientManager::getClientsPackage(int uid)
+{
+    QJsonObject  mainObject;
+    QJsonArray clientsArray;
+
+    mainObject.insert("action", QJsonValue::fromVariant("initSelf"));
+
+    clientsArray.push_back(this->getClientJsonObject(this->cc_clients[uid]));
+    mainObject.insert("self", clientsArray);
 
     QJsonDocument  json(mainObject);
     QString jsonString = json.toJson();

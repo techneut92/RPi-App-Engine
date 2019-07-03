@@ -36,6 +36,7 @@ private:
     void notifyOthersClientDisconnected(Client *c);
     QString genPackage(QString message);
     QJsonObject getClientJsonObject(Client *c);
+    QString getClientsPackage(int uid);
 
 signals:
 

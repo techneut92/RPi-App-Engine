@@ -41,7 +41,10 @@ void ClientManager::connectApp(Client *c)
     connect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
 
     qDebug() << "app" << c->getId() << "uid:" << c->uid << "Ready to process data";
-    c->sendTextMessage("HANDSHAKE_SUCCESS " + QString::number(c->uid) + this->getClientsPackage(c->getId(), c->uid));
+    c->sendTextMessage("HANDSHAKE_SUCCESS " +
+                       QString::number(c->uid) +
+                       " " +
+                       this->getClientsPackage(c->getId(), c->uid));
     c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
     this->notifyOthers(c);
 }

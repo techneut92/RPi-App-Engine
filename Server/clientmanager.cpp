@@ -44,7 +44,7 @@ void ClientManager::connectApp(Client *c)
     c->sendTextMessage("HANDSHAKE_SUCCESS " +
                        QString::number(c->uid) +
                        " " +
-                       this->getClientsPackage(c->getId(), c->uid).remove(' '));
+                       this->getClientsPackage(c->getId(), c->uid).replace(" ", ""));
     //c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
     this->notifyOthers(c);
 }

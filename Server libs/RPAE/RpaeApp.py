@@ -14,6 +14,7 @@ class RpaeApp:
         self._appTypes = ['serverApp', 'clientApp']
         self.host = host
         self._peers = []
+        self._appTypes = ['all', 'clientApp', 'serverApp', 'all', 'uid']
 
     # Handshake has to occur before data can be transmitted
     def _handshake(self, message):
@@ -27,8 +28,8 @@ class RpaeApp:
             message = message.split(' ')
             self._uid = int(message[1])
             self.onOpen()
-            [self._onMessage(m) for m in self._queue]
             self._isReady = True
+            [self._onMessage(m) for m in self._queue]
         elif message.startswith("HANDSHAKE_FAILURE"):
             self._onError(message)
         else:
@@ -36,28 +37,33 @@ class RpaeApp:
             self._queue.append(message)
 
     # create a package to send over the server
-    def _createPackage(self, message, appType, uidTarget):
+    @staticmethod
+    def _createPackage(message, target='clientApp', uidTarget=None):
         package = json.dumps({
-            'serverTarget': 'clientApp',
+            'serverTarget': target,
             'msgData': message
         })
-        if appType is not None:
-            package["serverTarget"] = appType
-        if uidTarget is not None:
-            package["serverTarget"] = "uid"
+        if target is not 'clientApp':
+            package["serverTarget"] = target
+        elif uidTarget is not None and target is 'uid':
             package["uid"] = uidTarget
+        elif target is 'uid' and uidTarget is None:
+            print("ERROR: trying to send message to specific uid but no uid is given")
+            return None
         return package
 
     # sends a message to other peers
-    def sendMessage(self, message, appType=None, uidTarget=None):
-        self._ws.send(self._createPackage(message, appType=appType, uidTarget=uidTarget))
+    def sendMessage(self, message, appType='clientApp', uidTarget=None):
+        msgData = self._createPackage(message, target=appType, uidTarget=uidTarget)
+        if msgData is not None:
+            self._ws.send()
 
-    def _serverSend(self, action):
-        package = json.dumps({
-            'serverTarget': 'server',
-            'action': action
-        })
-        self._ws.send(package)
+    #  _serverSend(self, action):
+    #    package = json.dumps({
+    #        'serverTarget': 'serverConsole',
+    #        'action': action
+    #    })
+    #    self._ws.send(package)
 
     # Receives messages after handshake is complete, should be overwritten
     def onMessage(self, message, origin):
@@ -69,6 +75,9 @@ class RpaeApp:
 
     # public onError function, could be overwritten
     def onError(self, error):
+        pass
+
+    def onNewClient(self, client):
         pass
 
     def start(self):
@@ -83,11 +92,14 @@ class RpaeApp:
                 message = json.loads(message)
             except ValueError:
                 print("received message not json")
-                self.onMessage(message, None)
+                # self.onMessage(message, None)
                 return
             if message["originName"] == "server":
-                pass  # TODO CREATE
+                print(message['msgData'])
+                print(type(message['msgData']))
+                # TODO CREATE FUNCTION OR CLASS TO HANDLE THIS
             else:
+                print(type(message['msgData']))
                 self.onMessage(message["msgData"], message["origin"])
 
     # sets connected to true once the websocket opens
@@ -98,6 +110,11 @@ class RpaeApp:
     def _onError(self, error):
         print(error)
         self.onError(error)
+
+    # private function of on new client, adds it to the program and executes the public one
+    def _onNewClient(self, data):
+        client = data
+        self.onNewClient(client)
 
     # getter for host
     @property
@@ -135,3 +152,7 @@ class RpaeApp:
     @property
     def id(self):
         return self._id
+
+    @property
+    def appTypes(self):
+        return self._appTypes

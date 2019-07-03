@@ -3,7 +3,9 @@ from RpaeApp import RpaeApp
 
 class ExampleApp(RpaeApp):
     def __init__(self):
-        super().__init__(aid="exampleApp", host="ws://192.168.2.8:9738")  # By default the host is "ws://localhost:9738"
+        # aid is your app ID, MANDATORY!!
+        # By default the host is "ws://localhost:9738" thus optional
+        super().__init__(aid="exampleApp", host="ws://192.168.2.8:9738")
 
     def onMessage(self, message, origin):
         print(message)
@@ -12,8 +14,13 @@ class ExampleApp(RpaeApp):
     def onError(self, error):
         pass
 
+    # executes when the connection is made and the handshake was successful
     def onOpen(self):
-        print("did onopen from main class")
+        pass
+
+    # executes when a new clients is connected
+    def onNewClient(self, client):
+        pass
 
 
 if __name__ == "__main__":

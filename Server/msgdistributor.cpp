@@ -38,11 +38,16 @@ void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap j
         // iterate through all clients with the same id and send a message to all client apps except the origin
         foreach( int uid, sorted_uids[origin->getId()])
             if (cc_clients[uid]->uid != origin->uid && cc_clients[uid]->appType() == AppType::WebClient)
-               cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
+                cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
     else if(jmap["serverTarget"].toString() == "uid"){
-        int uid = jmap["uid"].toInt();
-        cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
+        bool ok;
+        int uid = jmap["uid"].toInt(&ok);
+        if (!ok) {
+            qDebug() << "from uid:" << origin->uid << "app:" << origin->getId() <<
+                        "int conversion of uid failed. message not send. uid:" << jmap["uid"].toString();
+        }else
+            cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
     else if (jmap["serverTarget"].toString() == "server"){
         //this->serverCommandManager(origin, jmap);

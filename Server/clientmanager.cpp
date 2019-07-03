@@ -41,7 +41,7 @@ void ClientManager::connectApp(Client *c)
     connect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
 
     qDebug() << "app" << c->getId() << "uid:" << c->uid << "Ready to process data";
-    c->sendTextMessage("HANDSHAKE_SUCCESS " + QString::number(c->uid));
+    c->sendTextMessage("HANDSHAKE_SUCCESS " + QString::number(c->uid) + this->getClientsPackage(c->getId(), c->uid));
     c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
     this->notifyOthers(c);
 }
@@ -90,7 +90,7 @@ bool ClientManager::uidTaken(int uid)
     return this->cc_clients.keys().contains(uid) || this->u_clients.contains(uid);
 }
 
-QString ClientManager::getClientsPackage(QString id, int ruid)
+QString ClientManager::getClientsPackage(QString id, int excluded_uid)
 {
     QJsonObject  mainObject;
     QJsonArray clientsArray;
@@ -98,7 +98,7 @@ QString ClientManager::getClientsPackage(QString id, int ruid)
     mainObject.insert("action", QJsonValue::fromVariant("getClients"));
 
     foreach(int uid, this->sorted_uids[id])
-        if (ruid < 0 || (ruid >= 0 && ruid != uid))
+        if (excluded_uid < 0 || (excluded_uid >= 0 && excluded_uid != uid))
             clientsArray.push_back(this->getClientJsonObject(this->cc_clients[uid]));
     mainObject.insert("clients", clientsArray);
 

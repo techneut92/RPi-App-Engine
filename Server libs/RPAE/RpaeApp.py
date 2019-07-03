@@ -6,19 +6,18 @@ class RpaeApp:
     def __init__(self, aid, host="ws://localhost:9738"):
         self._id = aid                # the app id, when inheriting should be set
         self._uid = None            # the unique connection id. is set when the handshake is successful
-        self._host = None           # the websocket's host. when set it tries to connect and set self._ws
+        self._host = host           # the websocket's host. when set it tries to connect and set self._ws
         self._ws = None             # the websocket
         self._connected = False     # bool to show if host is connected
         self._isReady = False       # will set to true once the handshake is done
         self._queue = []            # queue to catch all messages during an handshake.
         self._appTypes = ['all', 'clientApp', 'serverApp', 'all', 'uid']
-        self.host = host
         self._peers = []
 
     # Handshake has to occur before data can be transmitted
     def _handshake(self, message):
-        print(message)
         if message == "HANDSHAKE":
+            print("Starting handshake with server")
             self._ws.send(json.dumps({
                 'id': self.id,
                 'appType': 'serverApp'
@@ -26,7 +25,9 @@ class RpaeApp:
         elif message.startswith("HANDSHAKE_SUCCES"):
             message = message.split(' ')
             self._uid = int(message[1])
+            self._handleServerMessages(message[2])
             self._isReady = True
+            print("handshake successful!")
             self.onOpen()
             [self._onMessage(m) for m in self._queue]
         elif message.startswith("HANDSHAKE_FAILURE"):
@@ -98,9 +99,8 @@ class RpaeApp:
                 message = json.loads(message)
             except ValueError:
                 print("received message not json")
-                # self.onMessage(message, None)
                 return
-            if message["originName"] == "server":
+            if 'originName' in message and message['originName'] == "server":
                 self._handleServerMessages(message['msgData'])
             else:
                 print(type(message['msgData']))
@@ -123,11 +123,15 @@ class RpaeApp:
     # getter for host
     @property
     def host(self):
-        return self.host
+        return self._host
+
+    @property
+    def _host(self):
+        return self._host
 
     # setter for host, automatically tries to connect to the server
-    @host.setter
-    def host(self, value):
+    @_host.setter
+    def _host(self, value):
         if self._connected:
             self._ws.close()
             del self._ws

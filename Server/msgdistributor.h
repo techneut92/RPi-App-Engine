@@ -19,7 +19,7 @@ public:
 private:
     ClientManager *cm;
 
-    void relayMessage(QString message, Client* origin, QVariantMap jmap);
+    void relayMessage(Client* origin, QVariantMap jmap);
     void relayMessage(QString message, Client* origin);
     QString genPackage(Client *origin, QString msg);
 

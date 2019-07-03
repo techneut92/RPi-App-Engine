@@ -30,7 +30,7 @@ private:
     void onDisconnect(Client *c);
     int getNewUid();
     bool uidTaken(int uid);
-    QString getClientsPackage(QString id, int ruid);
+    QString getClientsPackage(QString id, int excluded_uid);
     QString getClientsPackage(QString id);
     void notifyOthers(Client* new_client);
     QString genPackage(QString message);

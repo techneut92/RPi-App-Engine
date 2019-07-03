@@ -18,7 +18,13 @@ class ExampleApp(RpaeApp):
     def onOpen(self):
         print("my app ID:", self.id)
         print("my uid:", self.uid)
-        print("number of connected peers", self.peers.count())
+        print("number of connected peers", len(self.peers))  # NOTE: this won't work yet. filled AFTER handshake
+        print("connected with:", self.host)
+        print("isReady is true once the handshake is done. the onOpen function executes DURING a SUCCESSFUL handshake",
+              self.isReady)
+        print("connected is true if a connection could be made.", self.connected)
+        print("Apptypes contains targets one can send messages too", self.appTypes)
+        self.sendMessage(message="hello", appType=self.appTypes[0])  # default apptype is: clientApp
 
     # executes when a new clients is connected
     def onNewClient(self, client):

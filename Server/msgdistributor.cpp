@@ -19,7 +19,7 @@ void MsgDistributor::setServer(ClientManager *c)
 }
 
 // Function to relay messages to specific client groups
-void MsgDistributor::relayMessage(QString message, Client *origin, QVariantMap jmap)
+void MsgDistributor::relayMessage(Client *origin, QVariantMap jmap)
 {
     QMap<int, Client*> cc_clients = this->cm->getClients();
     QMap<QString, QList<int>> sorted_uids = this->cm->getSortedClients();
@@ -104,7 +104,7 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
     if (jsonHandler::isValidJson(message)){
         QVariantMap jmap = jsonHandler::jsonStringToQMap(message);
         if (!jmap["serverTarget"].isNull())
-            relayMessage(message, origin, jmap);
+            relayMessage(origin, jmap);
         else
             relayMessage(message, origin);
     }

@@ -42,6 +42,7 @@ class ExampleApp(RpaeApp):
     def onPeerDisconnected(self, peer):
         print("Bye peer! uid:", peer.uid, "app type:", peer.appType)
 
+    # this function might actually be pretty useless as you can do the same in __init__......
     def init(self):
         print("init is called when the start function triggers.")
         print("This function triggers before the handshake is done. as you can see connected is", self.connected)

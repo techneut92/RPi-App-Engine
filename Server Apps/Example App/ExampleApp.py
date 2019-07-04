@@ -3,9 +3,9 @@ from RPAE import RpaeApp
 
 class ExampleApp(RpaeApp):
     def __init__(self):
-        # aid is your app ID, MANDATORY!!
-        # By default the host is "ws://localhost:9738" thus optional
-        super().__init__(configFile='app.ini')
+        # set the name of your app configuration, usually app.ini. default is 'app.ini'
+        super().__init__()
+        # super().__init__(configFile='myconfig.ini')
 
     def onMessage(self, message, origin):
         print("new message from uid:", origin['uid'], "message:", message)

@@ -1,6 +1,11 @@
 import websocket
 import json
-from _peer import Peer
+from ._peer import Peer
+import configparser
+
+# defines
+_DEFAULT_HOST = 'ws://localhost:9738'
+_APPTYPE = 'serverApp'
 
 
 class RpaeApp(Peer):
@@ -12,19 +17,28 @@ class RpaeApp(Peer):
     __appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid']
     __peers = {}
 
-    def __init__(self, aid, host="ws://localhost:9738"):
-        super().__init__()
-        self._setAppID(aid)         # the app id, when inheriting should be set
-        self.___host = host         # the websocket's host. when set it tries to connect and set self._ws
+    def __init__(self, configFile='app.ini'):
+        super().__init__(configFile=configFile)
+        config = configparser.ConfigParser()
+        config.read(configFile)
+        if 'server_host' in config['app']:
+            self.___host = config['app']['server_host']  # the websocket's host.
+        else:
+            self.___host = _DEFAULT_HOST
+        del config
 
     # Handshake has to occur before data can be transmitted
     def __handshake(self, message):
         if message == "HANDSHAKE":
             print("Starting handshake with server")
-            self.__ws.send(json.dumps({
+            msg = {
                 'id': self.appID,
-                'appType': 'serverApp'
-            }))
+                'appType': _APPTYPE,
+                'location': ''
+            }
+            if self.location is not None:
+                msg['location'] = self.location
+            self.__ws.send(json.dumps(msg))
         elif message.startswith("HANDSHAKE_SUCCES"):
             self.__isReady = True
             message = message.split(' ')

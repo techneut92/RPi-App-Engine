@@ -1,1 +1,1 @@
-from RpaeApp import RpaeApp
+from .RpaeApp import RpaeApp

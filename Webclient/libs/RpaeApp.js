@@ -9,7 +9,7 @@ class RpaeApp{
     #host;
     #peers = {};
     #recQueue = [];
-    #sendQueue = []
+    #sendQueue = [];
     #appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid'];
     #connected = false;
     #isReady = false;
@@ -64,12 +64,14 @@ class RpaeApp{
         msg = JSON.parse(msg);
         switch (msg['action']){
             case 'newClient':
+                this.#onNewPeer(msg['client']);
                 break;
             case 'initSelf':
                 break;
             case 'getClients':
                 break;
             case 'clientDisconnected':
+                this.#onPeerDisconnect(msg['clientUid']);
                 break;
         }
     }
@@ -88,15 +90,15 @@ class RpaeApp{
 
     #onDisconnect(data){
         console.log(data);
-        this.onDisconnect(data);
+        this.onClose(data);
     }
 
     #onNewPeer(peer){
         this.onNewPeer(peer);
     }
 
-    #onPeerDisconnect(peer){
-        this.onPeerDisconnect(peer);
+    #onPeerDisconnect(peerUid){
+        this.onPeerDisconnect(peerUid);
     }
 
     #onError(err){
@@ -105,7 +107,7 @@ class RpaeApp{
 
     onOpen(){}
     onMessage(message){}
-    onDisconnect(info){}
+    onClose(info){}
     onError(error){}
     onNewPeer(peer){}
     onPeerDisconnect(peer){}

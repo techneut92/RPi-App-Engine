@@ -1,7 +1,7 @@
 from RPAE import RpaeApp
 
 
-class ExampleApp(RpaeApp):
+class MediaPlayer(RpaeApp):
     def __init__(self):
         # set the name of your app configuration, usually app.ini. default is 'app.ini'
         super().__init__()
@@ -27,5 +27,5 @@ class ExampleApp(RpaeApp):
 
 # The main function to start the app
 if __name__ == "__main__":
-    app = ExampleApp()      # First create an object of your app
-    ExampleApp().start()    # Connect to the server and start listening
+    app = MediaPlayer()      # First create an object of your app
+    MediaPlayer().start()    # Connect to the server and start listening

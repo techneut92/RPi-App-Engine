@@ -1,6 +1,7 @@
 class ExampleApp extends RpaeApp{
     constructor(){
         super('ExampleApp'); // Set your AppID here
+        this.host = 'ws://192.168.2.8:9738';
     }
 
     onOpen(){
@@ -12,7 +13,7 @@ class ExampleApp extends RpaeApp{
         console.log('onMessage from example app');
     }
 
-    onDisconnect(info){
+    onClose(data){
         console.log('onDisconnect from example app');
     }
 

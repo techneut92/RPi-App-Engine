@@ -8,8 +8,12 @@ class RpaeApp{
     #appId;
     #host;
     #peers = {};
-    #queue = [];
+    #recQueue = [];
+    #sendQueue = []
     #appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid'];
+    #connected = false;
+    #isReady = false;
+    #onOpenData;
 
     constructor(appId) {
         this.#appId = appId;
@@ -21,6 +25,7 @@ class RpaeApp{
         this.#ws.onmessage = this.#handshake;
         this.#ws.onclose = this.#onDisconnect;
         this.#ws.onerror = this.#onError;
+        this.#ws.connect();
     }
 
     #handshake(message){
@@ -35,14 +40,38 @@ class RpaeApp{
         }
         else if (message.data.startsWith('HANDSHAKE_SUCCES')){
             let msg = message.data.split(' ');
-            this.#handleServerMessages(JSON.parse(msg)[1]['msgData']);
-            this.#handleServerMessages(JSON.parse(msg)[2]['msgData']);
+            this.#handleServerMessages(JSON.parse(msg[1])['msgData']);
+            this.#handleServerMessages(JSON.parse(msg[2])['msgData']);
             this.#ws.onmessage = this.#onMessage;
+            this.onOpen(this.#onOpenData);
+            while(this.#recQueue.length > 0)
+                this.#onMessage(this.#recQueue.pop());
+            this.#isReady = true;
+            console.log('Handshake successful!');
+        }
+        else if (message.data.startsWith("HANDSHAKE_FAILURE")){
+            this.#onError(message.data);
+        }
+        else {
+            this.#recQueue.push(message);
+            if (this.#isReady)
+                while(this.#recQueue.length > 0)
+                    this.#onMessage(this.#recQueue.pop());
         }
     }
 
     #handleServerMessages(msg){
-
+        msg = JSON.parse(msg);
+        switch (msg['action']){
+            case 'newClient':
+                break;
+            case 'initSelf':
+                break;
+            case 'getClients':
+                break;
+            case 'clientDisconnected':
+                break;
+        }
     }
 
     #onMessage(message){
@@ -53,7 +82,8 @@ class RpaeApp{
 
     #onOpen(data){
         console.log(data);
-        this.onOpen();
+        this.#onOpenData = data;
+        this.#connected = true;
     }
 
     #onDisconnect(data){
@@ -80,21 +110,34 @@ class RpaeApp{
     onNewPeer(peer){}
     onPeerDisconnect(peer){}
 
-    #genPackage(message, target, uid=null){
-        if (target == null) target = this.#DEFAULT_TARGET;
-        else if (target === 'uid' && uid != null){
-
+    #genPackage(message, target=#DEFAULT_TARGET, uid=null){
+        let pck = {
+            'serverTarget': target,
+            'msgData': message
+        };
+        if (target !== #DEFAULT_TARGET){
+            pck.serverTarget = target;
+            if (uid != null && target === 'uid')
+                pck['uid'] = uid;
+            else if (uid == null && target === 'uid') {
+                console.log('ERROR: trying to send message to specific uid but no uid is given');
+                return null;
+            }
         }
+        return JSON.stringify(pck);
     }
 
     sendMessage(message, target=null, uidTarget=null){
-        if (this.isReady() === 'OPEN')
+        if (this.#isReady && this.#sendQueue.length > 0){
+            let msgdata = this.#sendQueue.pop();
+            this.#ws.send(msgdata[0], msgdata[1], msgdata[2]);
+            this.sendMessage(message, target, uidTarget);
+        }
+        else if (this.#isReady)
             this.#ws.send(this.#genPackage(message, target, uidTarget));
         else
-            let a = null // TODO REPLACE with adding to queue
+            this.#sendQueue.push([message, target, uidTarget]);
     }
-
-    get isReady(){ return this.#ws.readyState === 'OPEN'; }
 
     get WS_Status() { return this.#ws.readyState; }
     get appTypes() { return this.#appTypes; }
@@ -102,7 +145,7 @@ class RpaeApp{
 
     set host(value){
         this.#host = value;
-        if (this.isReady)
+        if (this.#isReady)
             this.#ws.close();
         this.#connect(value);
     }

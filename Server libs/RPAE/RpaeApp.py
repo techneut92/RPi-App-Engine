@@ -6,6 +6,7 @@ import configparser
 # defines
 _DEFAULT_HOST = 'ws://localhost:9738'
 _APPTYPE = 'serverApp'
+_DEFAULT_TARGET = 'clientApp'
 _DEFAULT_CONFIG = 'app.ini'
 
 
@@ -55,12 +56,12 @@ class RpaeApp(Peer):
 
     # create a package to send over the server
     @staticmethod
-    def __createPackage(message, target='clientApp', uidTarget=None):
+    def __createPackage(message, target=_DEFAULT_TARGET, uidTarget=None):
         package = {
             'serverTarget': target,
             'msgData': message
         }
-        if target != 'clientApp':
+        if target != _DEFAULT_TARGET:
             package["serverTarget"] = target
             if uidTarget is not None and target == 'uid':
                 package['uid'] = uidTarget

@@ -5,6 +5,7 @@ class ExampleApp extends RpaeApp{
 
     onOpen(){
         console.log('onopen from example app');
+        this.sendMessage('hello from webclient example app!');
     }
 
     onMessage(message){

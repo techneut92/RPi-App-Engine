@@ -30,7 +30,6 @@ class MediaPlayer:
         self.__playerProcess = subprocess.Popen(self.__playerCommand + ' ' + file, shell=shell,
                                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                 preexec_fn=os.setsid)
-        print('hi')
         self.__playingFile = file
         self.__fillFileData(file)
 
@@ -40,7 +39,7 @@ class MediaPlayer:
         self.__playerProcess = None
 
     def __fillFileData(self, file):
-        if file.lower().startswitch('http://') or file.lower().startswitch('https://'):
+        if file.lower().startswith('http://') or file.lower().startswith('https://'):
             self.__fileData = IcyData(file)
             print(self.__fileData.data)
 

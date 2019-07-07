@@ -59,7 +59,6 @@ class IcyData:
             self.__genre = self.__headers['icy-genre']
         if 'icy-br' in self.__headers:
             self.__bitrate = self.__headers['icy-br']
-        print(self.data)
 
     @property
     def name(self):

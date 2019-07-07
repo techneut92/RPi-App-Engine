@@ -28,13 +28,12 @@ class MediaPlayer:
         if self.__playerType == 'shell':
             shell = True
         self.__playerProcess = subprocess.Popen(self.__playerCommand + ' ' + file, shell=shell,
-                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                                preexec_fn=os.setsid)
+                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.__playingFile = file
         self.__fillFileData(file)
 
     def stop(self):
-        os.killpg(os.getpgid(self.__playerProcess.pid), signal.SIGTERM)
+        os.kill(self.__playerProcess.pid, signal.SIGTERM)
         self.__playingFile = None
         self.__playerProcess = None
 

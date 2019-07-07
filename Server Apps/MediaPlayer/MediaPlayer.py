@@ -2,6 +2,7 @@ from Controller import Controller
 import subprocess
 import os
 from IcyData import IcyData
+import signal
 
 
 class MediaPlayer:
@@ -27,13 +28,13 @@ class MediaPlayer:
         if self.__playerType == 'shell':
             shell = True
         self.__playerProcess = subprocess.Popen(self.__playerCommand + ' ' + file, shell=shell,
-                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                                preexec_fn=os.setsid)
         self.__playingFile = file
         self.__fillFileData(file)
 
     def stop(self):
-        os.kill(self.__playerProcess.pid, 2)
-        self.__playerProcess.kill()
+        os.killpg(os.getpgid(self.__playerProcess.pid), signal.SIGTERM)
         self.__playingFile = None
         self.__playerProcess = None
 

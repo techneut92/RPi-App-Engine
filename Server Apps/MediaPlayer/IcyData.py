@@ -49,7 +49,15 @@ class IcyData:
                 self.__updateData(meta_data)
 
     def __updateData(self, data):
-        print(data)
+        for d in data:
+            if '\x00' not in d:
+                new_data = d.split('=')
+                new_data[1] = new_data[1].strip('\"')
+                print('new data: ', new_data)
+                if new_data[0] == 'StreamTitle':
+                    self.__title = new_data[1]
+                    self.__onUpdate(self.data)
+        # print(data)
 
     @property
     def name(self):

@@ -39,6 +39,8 @@ class IcyData:
         self.__headers, stream = response.headers, response.raw
         print(self.__headers)
         print(type(self.__headers))
+        print(response.headers.get('icy-metaint'))
+        print(self.__headers['icy-metaint'])
         self.__metaint = int(self.__headers['icy-metaint'])
         self.__name = self.__headers['icy-name']
         self.__description = self.__headers['icy-description']

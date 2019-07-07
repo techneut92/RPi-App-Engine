@@ -23,6 +23,7 @@ class IcyData:
     def __init__(self, r_url):
         self.__requestUrl = r_url
         self.__detectEncoding()
+        self.__getData()
 
     def __detectEncoding(self):
         r_url = self.__requestUrl.lower()
@@ -31,7 +32,7 @@ class IcyData:
         elif 'ogg' in r_url:
             self.__encoding = 'utf-8'
 
-    def getData(self):
+    def __getData(self):
         request = urllib2.Request(self.__requestUrl, headers={'Icy-MetaData': 1})  # request metadata
         response = urllib2.urlopen(request)
         self.__headers = response.headers

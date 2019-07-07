@@ -70,7 +70,7 @@ class IcyData:
         #        if title:
         #            self.__title = title.decode(self.__encoding, errors='replace')
         #            break
-        if 'icy-name' in self.__headers.keys():
+        if 'icy-name' in self.__headers.items():
             self.__name = self.__headers.get('icy-name')
         if 'icy-description' in self.__headers:
             self.__description = self.__headers['icy-description']
@@ -120,7 +120,7 @@ class IcyData:
     @property
     def data(self):
         data = {
-            'name': self.__name
+            'name': self.__name,
             'title': self.__title,
             'description': self.__description,
             'url': self.__url,

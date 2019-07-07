@@ -28,7 +28,7 @@ class Controller(RpaeApp):
 
     # executes when a new clients is connected
     def onNewPeer(self, peer):
-        pass
+        self.mediaPlayer.sendStatus(peer)
 
     def onPeerDisconnected(self, peer):
         pass

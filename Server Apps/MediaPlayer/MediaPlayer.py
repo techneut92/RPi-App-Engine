@@ -3,6 +3,7 @@ import subprocess
 import os
 from IcyData import IcyData
 import signal
+import json
 
 
 class MediaPlayer:
@@ -14,9 +15,9 @@ class MediaPlayer:
     __fileData = None
 
     def __init__(self):
-        self.controller = Controller(self)
+        self.__controller = Controller(self)
         # do stuff
-        self.controller.start()
+        self.__controller.start()
 
     def __del__(self):
         self.stop()
@@ -43,7 +44,8 @@ class MediaPlayer:
             self.__fileData = IcyData(r_url=file, onUpdate=self.__onIcyUpdate)
 
     def __onIcyUpdate(self, data):
-        print('icy updated: ', data)
+        data['action'] = 'updateIcyData'
+        self.__controller.sendMessage(json.dumps(data))
 
     @property
     def isPlaying(self):
@@ -52,6 +54,17 @@ class MediaPlayer:
     @property
     def playingFile(self):
         return self.__playingFile
+
+    def sendStatus(self, peer):
+        self.__controller.sendMessage(self.status, peer.appType, peer.uid)
+
+    @property
+    def status(self):
+        data = {
+            'playing': True,
+            'fileData': self.__fileData.data
+        }
+        return json.dumps(data)
 
 
 # The main function to start the app

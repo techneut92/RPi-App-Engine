@@ -13,17 +13,10 @@ class Controller(RpaeApp):
 
     def onMessage(self, message, origin):
         print("new message from uid:", origin['uid'], "message:", message)
-        if message.startswith('PLAYSTREAM'):
-            if self.mp_pid is not None:
-                os.kill(self.mp_proc.pid, 2)
-                self.mp_pid = None
-            command = 'mplayer ' + message.split(' ')[1]
-            print('executing command:', command)
-            self.mp_proc = subprocess.Popen(command, shell=True)
-            self.mp_pid = self.mp_proc.pid
+        if message.startswith('PLAY'):
+            self.mediaPlayer.play(message.split(' ')[1])
         elif message == 'STOP':
-            os.kill(self.mp_proc.pid, 2)
-            self.mp_pid = None
+            self.mediaPlayer.stop()
 
     # If there is an error it will already be printed so add any other stuff you want to do here
     def onError(self, error):

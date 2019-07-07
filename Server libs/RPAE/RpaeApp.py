@@ -2,6 +2,7 @@ import websocket
 import json
 from ._peer import Peer
 import configparser
+import os
 
 # defines
 _DEFAULT_HOST = 'ws://localhost:9738'
@@ -19,7 +20,9 @@ class RpaeApp(Peer):
     __appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid']
     __peers = {}
 
-    def __init__(self, configFile=_DEFAULT_CONFIG):
+    def __init__(self, configFile=_DEFAULT_CONFIG, configDir='./'):
+        cDir = os.path.dirname(os.path.realpath(__file__))
+        configFile = cDir + '/' + configFile
         super().__init__(configFile=configFile)
         config = configparser.ConfigParser()
         config.read(configFile)

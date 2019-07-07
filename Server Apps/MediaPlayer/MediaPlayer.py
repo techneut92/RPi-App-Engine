@@ -38,7 +38,7 @@ class MediaPlayer:
 
     def stop(self):
         os.killpg(os.getpgid(self.__playerProcess.pid), signal.SIGTERM)
-        self.__playingFile.close()
+        self.__fileData.close()
         self.__playingFile = None
         self.__playerProcess = None
 

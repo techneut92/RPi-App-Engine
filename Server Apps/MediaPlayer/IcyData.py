@@ -37,8 +37,8 @@ class IcyData:
     def __requestData(self):
         response = requests.get(self.__requestUrl, headers={'Icy-MetaData': '1'}, stream=True)
         self.__headers, stream = response.headers, response.raw
-        meta_int = self.__headers.get('icy-metaint')
-        audio_length = int(meta_int)
+        self.__metaint = int(self.__headers.get('icy-metaint'))
+        audio_length = self.__metaint
         self.__fillData()
         while True:
             # new request
@@ -70,7 +70,6 @@ class IcyData:
         #        if title:
         #            self.__title = title.decode(self.__encoding, errors='replace')
         #            break
-        print(self.__headers.keys())
         if 'icy-name' in self.__headers:
             self.__name = self.__headers['icy-name']
         if 'icy-description' in self.__headers:
@@ -81,7 +80,6 @@ class IcyData:
             self.__genre = self.__headers['icy-genre']
         if 'icy-br' in self.__headers:
             self.__bitrate = self.__headers['icy-br']
-        print(self.data)
 
     @property
     def name(self):
@@ -130,6 +128,6 @@ class IcyData:
             'metaint': self.__metaint,
             'requestUrl': self.__requestUrl,
             'encoding': self.__encoding,
-            'headers': self.__headers,
+            # 'headers': self.__headers,
         }
         return data

@@ -26,7 +26,6 @@ class IcyData:
 
     def __del__(self):
         self.__close = True
-        self.__updateThread.join()
 
     def __detectEncoding(self):
         r_url = self.__requestUrl.lower()

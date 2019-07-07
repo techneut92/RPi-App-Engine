@@ -6,16 +6,16 @@ class ExampleApp extends RpaeApp{
 
     onOpen(data){
         console.log('Available peers: ', this.peers);
-        console.log('My app ID: ', this.appID);
-        console.log('My unique ID: ', this.uid); // uid is and unique id given by the server.
-        console.log('Number of connected peers: ', Object.keys(this.peers).length);
-        console.log('Connected with: ', this.host);
-        console.log('My app type: ', this.appType);
-        console.log('Peer address: ', this.peerAddress);
+        console.log('My app ID:', this.appID);
+        console.log('My unique ID:', this.uid); // uid is and unique id given by the server.
+        console.log('Number of connected peers:', Object.keys(this.peers).length);
+        console.log('Connected with:', this.host);
+        console.log('My app type:', this.appType);
+        console.log('Peer address:', this.peerAddress);
         console.log('Peer name', this.peerName);
-        console.log('Connected as: ', this.peerOrigin);
+        console.log('Connected as:', this.peerOrigin);
         console.log('isReady will be true once the connection is established AND had an successful handshake', this.isReady);
-        console.log('The apptypes usuable for sendMessage: ', this.appTypes);
+        console.log('The apptypes usuable for sendMessage:', this.appTypes);
         // let's send a message to all server apps!
         this.sendMessage('hello from webclient example app!');
         //it's a bit sad if we left anyone out. (self.appTypes[0] contains 'all')
@@ -35,7 +35,7 @@ class ExampleApp extends RpaeApp{
     }
 
     onNewPeer(peer){
-        console.log('New peer connected with uid: ', peer.uid, 'app type: ', peer.appType);
+        console.log('New peer connected with uid:', peer.uid, 'app type:', peer.appType);
         console.log('Lets say hello to our new friend!');
         this.sendMessage('Hello friend!', 'uid', peer.uid);
     }

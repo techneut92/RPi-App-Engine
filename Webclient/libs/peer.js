@@ -16,6 +16,8 @@ class Peer{
         if (!this.__updateSelfDone) {
             if (data['appId'] !== undefined)
                 this.__appID = data['appId'];
+            if (data['location'] !== undefined)
+                this.__location = data['location'];
             this.__appType = data['appType'];
             this.__uid = data['uid'];
             this.__peerAddress = data['peerAddress'];

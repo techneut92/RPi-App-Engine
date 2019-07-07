@@ -58,3 +58,64 @@ class IcyData:
             self.__genre = self.__headers['icy-genre']
         if 'icy-br' in self.__headers:
             self.__bitrate = self.__headers['icy-br']
+
+
+    __title = ''
+    __description = None
+    __url = None
+    __genre = None
+    __bitrate = None
+    __metaint = None
+    __requestUrl = None
+    __encoding = 'latin1'
+    __headers = None
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def title(self):
+        return self.__title
+
+    @property
+    def url(self):
+        return self.__url
+
+    @property
+    def genre(self):
+        return self.__genre
+
+    @property
+    def bitrate(self):
+        return self.__bitrate
+
+    @property
+    def metaint(self):
+        return self.__metaint
+
+    @property
+    def requestUrl(self):
+        return self.__requestUrl
+
+    @property
+    def encoding(self):
+        return self.__encoding
+
+    @property
+    def headers(self):
+        return self.__headers
+
+    @property
+    def data(self):
+        data = {
+            'title': self.__title,
+            'description': self.__description,
+            'url': self.__url,
+            'genre': self.__genre,
+            'bitrate': self.__bitrate,
+            'metaint': self.__metaint,
+            'requestUrl': self.__requestUrl,
+            'encoding': self.__encoding,
+            'headers': self.__headers,
+        }
+        return data

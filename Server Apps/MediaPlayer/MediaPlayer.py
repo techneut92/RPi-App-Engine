@@ -19,7 +19,7 @@ class MediaPlayer:
         self.controller.start()
 
     def __del__(self):
-        self.__playerProcess.kill()
+        self.stop()
 
     def play(self, file):
         if self.isPlaying:
@@ -41,6 +41,7 @@ class MediaPlayer:
     def __fillFileData(self, file):
         if file.lower().startswitch('http://') or file.lower().startswitch('https://'):
             self.__fileData = IcyData(file)
+            print(self.__fileData.data)
 
     @property
     def isPlaying(self):

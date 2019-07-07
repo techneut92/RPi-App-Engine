@@ -19,7 +19,7 @@ class MediaPlayer:
         self.__controller = Controller(self)
         # do stuff
         self.__controller.start()
-        atexit.register(self.stop())
+        atexit.register(self.stop)
 
     def __del__(self):
         self.stop()

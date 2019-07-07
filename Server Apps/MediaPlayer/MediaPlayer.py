@@ -30,6 +30,7 @@ class MediaPlayer:
         self.__playerProcess = subprocess.Popen(self.__playerCommand + ' ' + file, shell=shell,
                                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                 preexec_fn=os.setsid)
+        print('hi')
         self.__playingFile = file
         self.__fillFileData(file)
 

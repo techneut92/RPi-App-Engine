@@ -39,7 +39,7 @@ class Peer:
 
     def __init(self, uid=None, location=None, appID=None, appType=None,
                peerAddress=None, peerName=None, peerOrigin=None, clientDict=None):
-        if clientDict is None:  #  TODO DEBUG AND FIND OUT WHY THIS IS CALLED TWICE WHEN DECLARING A NEW OBJECT
+        if clientDict is None:  # TODO DEBUG AND FIND OUT WHY THIS IS CALLED TWICE WHEN DECLARING A NEW OBJECT
             self.__uid = uid
             self.__location = location
             self.__appID = appID

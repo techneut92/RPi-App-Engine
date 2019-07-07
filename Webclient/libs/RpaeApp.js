@@ -1,123 +1,142 @@
-class RpaeApp{
-    // DEFINES (sort of)
-    #DEFAULT_TARGET = 'serverApp';
-    #APPTYPE = 'clientApp';
+class RpaeApp extends Peer{
+    __DEFAULT_TARGET = 'serverApp';
+    __APPTYPE = 'clientApp';
 
-    // Attributes
-    #ws;
-    #appId;
-    #host;
-    #peers = {};
-    #recQueue = [];
-    #sendQueue = [];
-    #appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid'];
-    #connected = false;
-    #isReady = false;
-    #onOpenData;
+    __websocket = null;
+    __host = null;
+    __peers = {};
+    connected = false;
+    __isReady = false;
+    __recQueue = [];
+    __sendQueue = [];
+    __onOpenData = null;
+    __appTypes = ['all', 'clientApp', 'serverApp', 'unknownType', 'uid'];
 
-    constructor(appId) {
-        this.#appId = appId;
+    constructor(appID){
+        super(appID);
     }
 
-    #connect(host='ws://localhost:9738'){
-        this.#ws = new WebSocket(host);
-        this.#ws.onopen = this.#onOpen;
-        this.#ws.onmessage = this.#handshake;
-        this.#ws.onclose = this.#onDisconnect;
-        this.#ws.onerror = this.#onError;
-        this.#ws.connect();
+    __connectSocket(host="ws://localhost:9738") {
+        let ws = new WebSocket(host);
+        ws.onopen = (event) => this.__onOpen(event);
+        ws.onmessage = (message) => this.__handshake(message);
+        ws.onclose = (event) => this.__onClose(event);
+        ws.onerror = (event) => this.__onError(event);
+        return ws;
     }
 
-    #handshake(message){
-        console.log(message);
-        if (message.data === 'HANDSHAKE'){
-            console.log('init server handshake...');
-            let msg = {
-                'id': this.#appId,
-                'appType': this.#APPTYPE
-            };
-            this.#ws.send(JSON.stringify(msg));
-        }
-        else if (message.data.startsWith('HANDSHAKE_SUCCES')){
-            let msg = message.data.split(' ');
-            this.#handleServerMessages(JSON.parse(msg[1])['msgData']);
-            this.#handleServerMessages(JSON.parse(msg[2])['msgData']);
-            this.#ws.onmessage = this.#onMessage;
-            this.onOpen(this.#onOpenData);
-            while(this.#recQueue.length > 0)
-                this.#onMessage(this.#recQueue.pop());
-            this.#isReady = true;
-            console.log('Handshake successful!');
-        }
-        else if (message.data.startsWith("HANDSHAKE_FAILURE")){
-            this.#onError(message.data);
-        }
-        else {
-            this.#recQueue.push(message);
-            if (this.#isReady)
-                while(this.#recQueue.length > 0)
-                    this.#onMessage(this.#recQueue.pop());
-        }
+    __onOpen(data){
+        this.__connected = true;
+        this.__onOpenData = data;
     }
-
-    #handleServerMessages(msg){
-        msg = JSON.parse(msg);
-        switch (msg['action']){
-            case 'newClient':
-                this.#onNewPeer(msg['client']);
-                break;
-            case 'initSelf':
-                break;
-            case 'getClients':
-                break;
-            case 'clientDisconnected':
-                this.#onPeerDisconnect(msg['clientUid']);
-                break;
-        }
-    }
-
-    #onMessage(message){
-        console.log(message);
-        let msg = JSON.parse(message.data);
-        this.onMessage(msg);
-    }
-
-    #onOpen(data){
-        console.log(data);
-        this.#onOpenData = data;
-        this.#connected = true;
-    }
-
-    #onDisconnect(data){
-        console.log(data);
+    
+    __onClose(data){
+        // TODO from data check why it disconnected and attempt reconnects if necessary.
+        this.__peers = {};
+        this.__uid = null;
+        this.__peerAddress = null;
+        this.__peerName = null;
+        this.__peerOrigin = null;
+        this.__updateSelfDone = false;
+        this.__connected = false;
+        this.__isReady = false;
         this.onClose(data);
     }
-
-    #onNewPeer(peer){
-        this.onNewPeer(peer);
-    }
-
-    #onPeerDisconnect(peerUid){
-        this.onPeerDisconnect(peerUid);
-    }
-
-    #onError(err){
+    
+    __onError(err){
+        // TODO ATTEMPT RECONNECT AFTER x SECONDS
         this.onError(err);
     }
 
-    onOpen(){}
-    onMessage(message){}
-    onClose(info){}
-    onError(error){}
-    onNewPeer(peer){}
-    onPeerDisconnect(peer){}
+    __onMessage(message){
+        try {
+            let msg = JSON.parse(message.data);
+            if (msg['originName'] !== undefined && msg['originName'] === 'server')
+                this.__handleServerMessages(msg['msgData']);
+            else
+                this.onMessage(msg['msgData'], this.__peers[msg['origin']['uid']])
+        }
+        catch (e){
+            console.log('error parsing message in ' + this.__appID + ' uid: ' + this.uid);
+            console.log(e);
+        }
 
-    #genPackage(message, target=#DEFAULT_TARGET, uid=null){
+    }
+
+    __onNewPeer(peer){
+        let p = new Peer();
+        p.__updateSelf(peer);
+        this.__peers[p.uid] = p;
+        this.onNewPeer(p);
+    }
+
+    __onPeerDisconnect(peerUid) {
+        let p = this.__peers[peerUid];
+        delete this.__peers[peerUid];
+        this.onPeerDisconnect(p);
+    }
+
+    __handleServerMessages(msg){
+        msg = JSON.parse(msg);
+        switch (msg['action']){
+            case 'newClient':
+                this.__onNewPeer(msg['client']);
+                break;
+            case 'initSelf':
+                this.__updateSelf(msg['self']);
+                break;
+            case 'getClients':
+                for (let i = 0; i < msg['clients'].length; i++) {
+                    this.__peers[msg['clients'][i]['uid']] = new Peer();
+                    this.__peers[msg['clients'][i]['uid']].__updateSelf(msg['clients'][i]);
+                }
+                break;
+            case 'clientDisconnected':
+                this.__onPeerDisconnect(msg['clientUid']);
+                break;
+        }
+    }
+
+    __handshake(message){
+        if (message.data === 'HANDSHAKE'){
+            let msg = {
+                'id': this.__appID,
+                'appType': this.__APPTYPE
+            };
+            this.__websocket.send(JSON.stringify(msg));
+        }
+        else if (message.data.startsWith('HANDSHAKE_SUCCES')){
+            let msg = message.data.split(' ');
+            this.__handleServerMessages(JSON.parse(msg[1])['msgData']);
+            this.__handleServerMessages(JSON.parse(msg[2])['msgData']);
+            this.__websocket.onmessage = (message) => this.__onMessage(message);
+            while(this.__recQueue.length > 0)
+                this.__onMessage(this.__recQueue.pop());
+            this.__isReady = true;
+            this.onOpen(this.__onOpenData);
+            if (this.__sendQueue.length > 0) {
+                let msgdata = this.__sendQueue.pop();
+                this.__websocket.send(this.__genPackage(msgdata[0],
+                    msgdata[1], msgdata[2]));
+            }
+        }
+        else if (message.data.startsWith("HANDSHAKE_FAILURE")){
+            this.__onError(message.data);
+        }
+        else {
+            this.__recQueue.push(message);
+            if (this.__isReady)
+                while(this.__recQueue.length > 0)
+                    this.__onMessage(this.__recQueue.pop());
+        }
+    }
+
+    __genPackage(message, target = this.__DEFAULT_TARGET, uid = null) {
         let pck = {
             'serverTarget': target,
             'msgData': message
         };
-        if (target !== #DEFAULT_TARGET){
+        if (target !== this.__DEFAULT_TARGET) {
             pck.serverTarget = target;
             if (uid != null && target === 'uid')
                 pck['uid'] = uid;
@@ -129,26 +148,41 @@ class RpaeApp{
         return JSON.stringify(pck);
     }
 
-    sendMessage(message, target=null, uidTarget=null){
-        if (this.#isReady && this.#sendQueue.length > 0){
-            let msgdata = this.#sendQueue.pop();
-            this.#ws.send(msgdata[0], msgdata[1], msgdata[2]);
+    sendMessage(message, target=this.__DEFAULT_TARGET, uidTarget=null){
+        if (this.isReady && this.__sendQueue.length > 0) {
+            let msgdata = this.__sendQueue.pop();
+            this.sendMessage(this.__genPackage(msgdata[0],
+                msgdata[1], msgdata[2]));
             this.sendMessage(message, target, uidTarget);
-        }
-        else if (this.#isReady)
-            this.#ws.send(this.#genPackage(message, target, uidTarget));
-        else
-            this.#sendQueue.push([message, target, uidTarget]);
+        } else if (this.__isReady) {
+            this.__websocket.send(this.__genPackage(message, target, uidTarget));
+        } else
+            this.__sendQueue.push([message, target, uidTarget]);
     }
 
-    get WS_Status() { return this.#ws.readyState; }
-    get appTypes() { return this.#appTypes; }
-    get host(){ return this.#host }
+    openSocket(){ this.host = this.__host; }
+    closeSocket(){ this.__websocket.close(); }
 
+    // functions to be overridden by the new class
+    onOpen(data) {}
+    onClose(data) {}
+    onError(err) {}
+    onNewPeer(peer) {}
+    onPeerDisconnect() {}
+
+    get appTypes() { return this.__appTypes; }
+    get peers() { return this.__peers; }
+    get isReady() {return this.__isReady; }
+    get isConnected() { return this.__connected; }
+
+    get host() {return this.__host;}
     set host(value){
-        this.#host = value;
-        if (this.#isReady)
-            this.#ws.close();
-        this.#connect(value);
+        this.__host = value;
+        if (this.__connected) {
+            this.__isReady = false;
+            this.__connected = false;
+            this.__websocket.close();
+        }
+        this.__websocket = this.__connectSocket(value);
     }
 }

@@ -3,9 +3,9 @@ from RPAE import RpaeApp
 
 class ExampleApp(RpaeApp):
     def __init__(self):
-        # aid is your app ID, MANDATORY!!
-        # By default the host is "ws://localhost:9738" thus optional
-        super().__init__(configFile='app.ini')
+        # set the name of your app configuration, usually app.ini. default is 'app.ini'
+        super().__init__()
+        # super().__init__(configFile='myconfig.ini')
 
     def onMessage(self, message, origin):
         print("new message from uid:", origin['uid'], "message:", message)
@@ -42,6 +42,7 @@ class ExampleApp(RpaeApp):
     def onPeerDisconnected(self, peer):
         print("Bye peer! uid:", peer.uid, "app type:", peer.appType)
 
+    # this function might actually be pretty useless as you can do the same in __init__......
     def init(self):
         print("init is called when the start function triggers.")
         print("This function triggers before the handshake is done. as you can see connected is", self.connected)

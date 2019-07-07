@@ -32,7 +32,6 @@ class RpaeApp(Peer):
     # Handshake has to occur before data can be transmitted
     def __handshake(self, message):
         if message == "HANDSHAKE":
-            print("Starting handshake with server")
             msg = {
                 'id': self.appID,
                 'appType': _APPTYPE,
@@ -46,7 +45,6 @@ class RpaeApp(Peer):
             message = message.split(' ')
             self.__onMessage(message[1])
             self.__onMessage(message[2])
-            print("handshake successful!")
             self.onOpen()
             [self.__onMessage(m) for m in self.__queue]
         elif message.startswith("HANDSHAKE_FAILURE"):

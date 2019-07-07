@@ -1,13 +1,26 @@
 from RPAE import RpaeApp
+import subprocess
+import os
 
 
 class MediaPlayer(RpaeApp):
     def __init__(self):
         # set the name of your app configuration, usually app.ini. default is 'app.ini'
         super().__init__()
+        self.mp_pid = None
+        self.mp_proc = None
 
     def onMessage(self, message, origin):
         print("new message from uid:", origin['uid'], "message:", message)
+        if message.startswith('PLAYSTREAM'):
+            if self.mp_pid is not None:
+                os.kill(self.mp_proc.pid, 2)
+                self.mp_pid = None
+            self.mp_proc = subprocess.Popen('mplayer ' + message.split(' ')[1])
+            self.mp_pid = self.mp_proc.pid
+        elif message == 'STOP':
+            os.kill(self.mp_proc.pid, 2)
+            self.mp_pid = None
 
     # If there is an error it will already be printed so add any other stuff you want to do here
     def onError(self, error):

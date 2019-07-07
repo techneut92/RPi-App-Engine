@@ -97,7 +97,7 @@ apt-get dist-upgrade -y >/Install.log
 
 #install depency's
 echo "Installing depency's..."
-sudo apt-get install -y php7.0 php7.0-mcrypt php7.0-mysql \
+sudo apt-get install -y php7.0 php7.0-mcrypt php7.0-mysql mplayer \
 apache2 qt5-qmake qt5-default libqt5websockets5 libqt5websockets5-dev python3 > ./Install.log
 python3 -m pip install --upgrade pip > ./Install.log
 python3 -m pip install websocket_client > ./Install.log

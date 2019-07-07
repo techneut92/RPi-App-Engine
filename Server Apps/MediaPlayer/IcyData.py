@@ -60,7 +60,6 @@ class IcyData:
                 new_data = d.split('=')
                 new_data[1] = new_data[1].strip('\"')
                 new_data[1] = new_data[1].strip('\'').strip()
-                print('new data: ', new_data)
                 if new_data[0] == 'StreamTitle':
                     self.__title = new_data[1]
                     self.__onUpdate(self.data)

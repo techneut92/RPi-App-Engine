@@ -24,7 +24,6 @@ class IcyData:
     def __init__(self, r_url):
         self.__requestUrl = r_url
         self.__detectEncoding()
-        self.__fillData()
         self.__updateThread = Thread(target=self.__requestData)
         self.__updateThread.start()
 

@@ -59,16 +59,6 @@ class IcyData:
         if 'icy-br' in self.__headers:
             self.__bitrate = self.__headers['icy-br']
 
-
-    __title = ''
-    __description = None
-    __url = None
-    __genre = None
-    __bitrate = None
-    __metaint = None
-    __requestUrl = None
-    __encoding = 'latin1'
-    __headers = None
     @property
     def name(self):
         return self.__name

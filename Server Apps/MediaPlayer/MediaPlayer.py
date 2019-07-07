@@ -27,19 +27,20 @@ class MediaPlayer:
         shell = False
         if self.__playerType == 'shell':
             shell = True
-        self.__playerProcess = subprocess.Popen(self.__playerCommand + ' ' + file, shell=shell,
+        self.__playerProcess = subprocess.call(self.__playerCommand + ' ' + file, shell=shell,
                                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(self.__playerProcess)
         self.__playingFile = file
         self.__fillFileData(file)
 
     def stop(self):
-        os.kill(self.__playerProcess.pid, signal.SIGTERM)
+        # os.kill(self.__playerProcess.pid, signal.SIGTERM)
         self.__playingFile = None
         self.__playerProcess = None
 
     def __fillFileData(self, file):
         if file.lower().startswith('http://') or file.lower().startswith('https://'):
-            self.__fileData = IcyData(file)
+            # self.__fileData = IcyData(file)
             print(self.__fileData.data)
 
     @property

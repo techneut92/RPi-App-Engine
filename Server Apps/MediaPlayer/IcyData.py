@@ -24,8 +24,8 @@ class IcyData:
     def __init__(self, r_url):
         self.__requestUrl = r_url
         self.__detectEncoding()
-        self.__getData()
-        self.__updateThread = Thread(target=self.__updateData)
+        self.__fillData()
+        self.__updateThread = Thread(target=self.__requestData)
         self.__updateThread.start()
 
     def __detectEncoding(self):
@@ -35,37 +35,43 @@ class IcyData:
         elif 'ogg' in r_url:
             self.__encoding = 'utf-8'
 
-    def __updateData(self):
+    def __requestData(self):
+        response = requests.get(self.__requestUrl, headers={'Icy-MetaData': '1'}, stream=True)
+        self.__headers, stream = response.headers, response.raw
+        meta_int = self.__headers.get('icy-metaint')
+        audio_length = int(meta_int)
+        self.__fillData()
         while True:
             # new request
-            response = requests.get(self.__requestUrl, headers={'Icy-MetaData': 1}, stream=True)
-            response.raise_for_status()
-            headers, stream = response.headers, response.raw
-            meta_int = headers.get('icy-metaint')
-            audio_length = int(meta_int)
-            audio_data = stream.read(audio_length)
+            # response = requests.get(self.__requestUrl, headers={'Icy-MetaData': '1'}, stream=True)
+            # response.raise_for_status()
+            audio_data = stream.read(audio_length) # not being used atm
             meta_byte = stream.read(1)
             if meta_byte:
                 meta_length = ord(meta_byte) * 16
-                meta_data = stream.read(meta_length)
-                print(meta_data)
+                meta_data = stream.read(meta_length).decode(self.__encoding).split(';')
+                self.__updateData(meta_data)
 
-    def __getData(self):
-        request = urllib2.Request(self.__requestUrl, headers={'Icy-MetaData': 1})  # request metadata
-        response = urllib2.urlopen(request)
-        self.__headers = response.headers
-        self.__metaint = int(response.headers['icy-metaint'])
-        for _ in range(10):  # title may be empty initially, try several times
-            response.read(self.__metaint)  # skip to metadata
-            metadata_length = struct.unpack('B', response.read(1))[0] * 16  # length byte
-            metadata = response.read(metadata_length).rstrip(b'\0')
-            # extract title from the metadata
-            m = re.search(br"StreamTitle='([^']*)';", metadata)
-            if m:
-                title = m.group(1)
-                if title:
-                    self.__title = title.decode(self.__encoding, errors='replace')
-                    break
+    def __updateData(self, data):
+        print(data)
+
+    def __fillData(self):
+        #request = urllib2.Request(self.__requestUrl, headers={'Icy-MetaData': 1})  # request metadata
+        #response = urllib2.urlopen(request)
+        #self.__headers = response.headers
+        #self.__metaint = int(response.headers['icy-metaint'])
+        #for _ in range(10):  # title may be empty initially, try several times
+        #    response.read(self.__metaint)  # skip to metadata
+        #    metadata_length = struct.unpack('B', response.read(1))[0] * 16  # length byte
+        #    metadata = response.read(metadata_length).rstrip(b'\0')
+        #    # extract title from the metadata
+        #    m = re.search(br"StreamTitle='([^']*)';", metadata)
+        #    if m:
+        #        title = m.group(1)
+        #        if title:
+        #            self.__title = title.decode(self.__encoding, errors='replace')
+        #            break
+        print(self.__headers.keys())
         if 'icy-name' in self.__headers:
             self.__name = self.__headers['icy-name']
         if 'icy-description' in self.__headers:

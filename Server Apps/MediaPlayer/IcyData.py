@@ -67,6 +67,7 @@ class IcyData:
 
     def close(self):
         self.__close = True
+        self.__updateThread.join(1)
 
     def start(self):
         self.__close = False

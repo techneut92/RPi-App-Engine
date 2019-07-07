@@ -37,7 +37,7 @@ class IcyData:
         self.__headers = response.headers
         self.__metaint = int(response.headers['icy-metaint'])
         for _ in range(10):  # title may be empty initially, try several times
-            response.read(metaint)  # skip to metadata
+            response.read(self.__metaint)  # skip to metadata
             metadata_length = struct.unpack('B', response.read(1))[0] * 16  # length byte
             metadata = response.read(metadata_length).rstrip(b'\0')
             print(str(metadata), file=sys.stderr)
@@ -46,7 +46,7 @@ class IcyData:
             if m:
                 title = m.group(1)
                 if title:
-                    self.__title = title.decode(encoding, errors='replace')
+                    self.__title = title.decode(self.__encoding, errors='replace')
                     break
         if 'icy-name' in self.__headers:
             self.__name = self.__headers['icy-name']
@@ -58,6 +58,7 @@ class IcyData:
             self.__genre = self.__headers['icy-genre']
         if 'icy-br' in self.__headers:
             self.__bitrate = self.__headers['icy-br']
+        print(self.data)
 
     @property
     def name(self):

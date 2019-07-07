@@ -40,8 +40,11 @@ class MediaPlayer:
 
     def __fillFileData(self, file):
         if file.lower().startswith('http://') or file.lower().startswith('https://'):
-            self.__fileData = IcyData(file)
+            self.__fileData = IcyData(file, self.__onIcyUpdate)
             print(self.__fileData.data)
+
+    def __onIcyUpdate(self, data):
+        print('icy updated: ', data)
 
     @property
     def isPlaying(self):

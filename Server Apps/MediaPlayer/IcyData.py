@@ -70,16 +70,11 @@ class IcyData:
         #        if title:
         #            self.__title = title.decode(self.__encoding, errors='replace')
         #            break
-        if 'icy-name' in self.__headers.items():
-            self.__name = self.__headers.get('icy-name')
-        if 'icy-description' in self.__headers:
-            self.__description = self.__headers['icy-description']
-        if 'icy-url' in self.__headers:
-            self.__url = self.__headers['icy-url']
-        if 'icy-genre' in self.__headers:
-            self.__genre = self.__headers['icy-genre']
-        if 'icy-br' in self.__headers:
-            self.__bitrate = self.__headers['icy-br']
+        self.__name = self.__headers.get('icy-name')
+        self.__description = self.__headers['icy-description']
+        self.__url = self.__headers['icy-url']
+        self.__genre = self.__headers['icy-genre']
+        self.__bitrate = self.__headers['icy-br']
 
     @property
     def name(self):

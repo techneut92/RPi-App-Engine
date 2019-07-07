@@ -17,6 +17,9 @@ class MediaPlayer:
         # do stuff
         self.controller.start()
 
+    def __del__(self):
+        self.__playerProcess.kill()
+
     def play(self, file):
         if self.isPlaying:
             self.stop()
@@ -30,6 +33,7 @@ class MediaPlayer:
 
     def stop(self):
         os.kill(self.__playerProcess.pid, 2)
+        self.__playerProcess.kill()
         self.__playingFile = None
         self.__playerProcess = None
 

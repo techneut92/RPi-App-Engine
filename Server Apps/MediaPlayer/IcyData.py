@@ -65,6 +65,13 @@ class IcyData:
                 else:
                     print('unknown data type in icy cast:', new_data[0])
 
+    def close(self):
+        self.__close = True
+
+    def start(self):
+        self.__close = False
+        self.__updateThread.start()
+
     @property
     def name(self):
         return self.__name
@@ -116,3 +123,7 @@ class IcyData:
             # 'headers': self.__headers,
         }
         return data
+
+    @property
+    def closed(self):
+        return self.__close

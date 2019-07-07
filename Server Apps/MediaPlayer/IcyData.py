@@ -38,8 +38,8 @@ class IcyData:
         response = requests.get(self.__requestUrl, headers={'Icy-MetaData': '1'}, stream=True)
         self.__headers, stream = response.headers, response.raw
         print(self.__headers)
-        self.__metaint = int(self.__headers.get('icy-metaint'))
-        self.__name = self.__headers.get('icy-name')
+        self.__metaint = int(self.__headers.['icy-metaint'])
+        self.__name = self.__headers.get['icy-name']
         self.__description = self.__headers['icy-description']
         self.__url = self.__headers['icy-url']
         self.__genre = self.__headers['icy-genre']

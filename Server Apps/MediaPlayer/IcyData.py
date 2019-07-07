@@ -50,7 +50,7 @@ class IcyData:
 
     def __updateData(self, data):
         for d in data:
-            if b'\x00' not in d:
+            if '=' in d:
                 print('pre edited data: ', d)
                 new_data = d.split('=')
                 new_data[1] = new_data[1].strip('\"')

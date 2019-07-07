@@ -16,7 +16,9 @@ class MediaPlayer(RpaeApp):
             if self.mp_pid is not None:
                 os.kill(self.mp_proc.pid, 2)
                 self.mp_pid = None
-            self.mp_proc = subprocess.Popen('mplayer ' + message.split(' ')[1])
+            command = ['mplayer ', message.split(' ')[1]]
+            print('executing command:', command)
+            self.mp_proc = subprocess.Popen(command, shell=True)
             self.mp_pid = self.mp_proc.pid
         elif message == 'STOP':
             os.kill(self.mp_proc.pid, 2)

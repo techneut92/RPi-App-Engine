@@ -14,7 +14,6 @@ class AudioController(RpaeApp):
         if 'task' in data:
             print(data)
             if data['task'] == "setVolume":
-                print('action 1')
                 self._set_volume(origin, data)
 
     def onOpen(self):

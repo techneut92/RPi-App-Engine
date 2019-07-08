@@ -29,7 +29,9 @@ class AudioController(RpaeApp):
         :param data: dict with data
         :return: none
         """
+        print('action 1.1', data)
         data['task'] = 'update'
+        print('action 1.2', data)
         data['origin'] = origin.uid
         print('action 2', data)
         if 'mixer' in data and 'value' in data and data['mixer'] != 'default':

@@ -145,4 +145,4 @@ cp -ar ./Server\ libs/RPAE /usr/local/lib/python3*/dist-packages/
 rpae-server &
 python3 ./Server\ Apps/Rpae-Audio/AudioController.py &
 python3 ./Server\ Apps/MediaPlayer/MediaPlayer.py &
-su -c "chromium-browser http://localhost" -l pi &
+su -c "chromium-browser http://localhost http://localhost" -l pi &

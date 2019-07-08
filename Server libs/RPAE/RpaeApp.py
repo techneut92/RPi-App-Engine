@@ -23,7 +23,6 @@ class RpaeApp(Peer):
 
     def __init__(self, configFile=_DEFAULT_CONFIG, configDir='./'):
         cDir = sys.path[0]
-        print('TRYING TO GET THE APP INI DIR AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', sys.path[0])
         configFile = cDir + '/' + configFile
         super().__init__(configFile=configFile)
         config = configparser.ConfigParser()

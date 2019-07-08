@@ -117,7 +117,7 @@ if test -L "$SL"; then
 fi
 ln -s "$(pwd)/Server/Server" /usr/bin/rpae-server > ./Install.log
 mkdir -p /etc/rpae/server > ./Install.log
-cp ./Server/server.ini /etc/rpae/server/ > ./Install.log
+cp -ar ./Server/server.ini /etc/rpae/server/ > ./Install.log
 
 ######## TODO CREATE SERVICE ###############
 #echo "Creating Server service..."
@@ -130,7 +130,7 @@ cp ./Server/server.ini /etc/rpae/server/ > ./Install.log
 
 ######## TODO INSTALL WEBCLIENT ########
 rm -rf /var/www/html/*
-cp ./Webclient/* /var/www/html/
+cp -ar ./Webclient/* /var/www/html/
 
 ######## INSTALL SERVER LIBS ########
 RPLIBS=/usr/local/lib/python3*/dist-packages/RPAE

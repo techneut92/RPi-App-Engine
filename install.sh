@@ -128,8 +128,10 @@ cp -ar ./Server/server.ini /etc/rpae/server/ > ./Install.log
 ######## TODO SET UNCLUTTER #########
 
 ######## TODO INSTALL WEBCLIENT ########
+echo "Installing webclient..."
 rm -rf /var/www/html/*
 cp -ar ./Webclient/* /var/www/html/
+chown -R www-data:www-data /var/www/*
 
 ######## INSTALL SERVER LIBS ########
 RPLIBS=/usr/local/lib/python3*/dist-packages/RPAE

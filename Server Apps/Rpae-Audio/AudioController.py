@@ -64,3 +64,8 @@ class AudioController(RpaeApp):
                 d[mixer.name]['channels'].update(d2)
             data['mixers'].update(d)
         return data
+
+
+if __name__ == "__main__":
+    app = AudioController()      # First create an object of your app
+    app.start()

@@ -39,8 +39,3 @@ class Controller(RpaeApp):
     def onPeerDisconnected(self, peer):
         pass
 
-
-# The main function to start the app
-if __name__ == "__main__":
-    app = MediaPlayer()      # First create an object of your app
-    MediaPlayer().start()    # Connect to the server and start listening

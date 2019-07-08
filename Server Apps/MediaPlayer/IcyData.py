@@ -1,5 +1,6 @@
 import requests
 from threading import Thread
+import sys
 
 
 class IcyData:
@@ -16,12 +17,17 @@ class IcyData:
     __updateThread = None
     __onUpdate = None
     __close = False
+    __audioData = None
 
     def __init__(self, r_url, onUpdate):
         self.__requestUrl = r_url
         self.__detectEncoding()
-        self.__updateThread = Thread(target=self.__requestData)
-        self.__updateThread.start()
+        self.__updateThread = Thread(target=self.__requestData, daemon=True)
+        try:
+            self.__updateThread.start()
+        except (KeyboardInterrupt, SystemExit):
+            self.__close = True
+            sys.exit()
         self.__onUpdate = onUpdate
 
     def __del__(self):
@@ -46,7 +52,7 @@ class IcyData:
         audio_length = self.__metaint
         self.__onUpdate(self.data)
         while not self.__close:
-            audio_data = stream.read(audio_length)  # not being used atm
+            self.__audio_data = stream.read(audio_length)  # not being used atm
             meta_byte = stream.read(1)
             if meta_byte:
                 meta_length = ord(meta_byte) * 16

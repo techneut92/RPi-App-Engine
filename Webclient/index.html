@@ -9,7 +9,7 @@
     <meta http-equiv="pragma" content="no-cache" />
     <script type="text/javascript" src="libs/peer.js"></script>
     <script type="text/javascript" src="libs/RpaeApp.js"></script>
-    <script type="text/javascript" src="apps/ExampleApp/js/ExampleApp.js"></script>
+    <script type="text/javascript" src="apps/MediaPlayer/js/MediaPlayer.js"></script>
     <title>RPAE</title>
     <style>
         body, html{
@@ -20,9 +20,9 @@
 </head>
 <body>
 <script>
-    ex_app = new ExampleApp();
+    mediaPlayer = new MediaPlayer();
 </script>
-<button onclick="ex_app.closeSocket()">Close socket</button>
-<button onclick="ex_app.openSocket()">Open socket</button>
+<button onclick="mediaPlayer.playStream('https://21253.live.streamtheworld.com/SLAM_MP3_SC?')">Play Slam!</button>
+<button onclick="mediaPlayer.playStream('http://18973.live.streamtheworld.com/RADIO538.mp3')">Play 538</button>
 </body>
 </html>

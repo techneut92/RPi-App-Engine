@@ -7,7 +7,7 @@ class RpaeAudio extends RpaeApp{
 
     constructor(){
         super('Rpae-Audio');                    // Set your AppID here
-        this.host = 'ws://' + window.location.hostname + ':9738';    // Setting host will immediately start up the connection.
+        this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
     }
 
     onOpen(data){
@@ -19,8 +19,8 @@ class RpaeAudio extends RpaeApp{
         if (message['task'] === 'init')
             this.init(message);
         else if (message['task'] === 'update'){
-            $('#rpae-volumeSlider').val( message['value']);
-            console.log('update', message['value'])
+            if (message['origin'].uid !== this.uid)
+                $('#rpae-volumeSlider').val( message['value']);
         }
     }
 

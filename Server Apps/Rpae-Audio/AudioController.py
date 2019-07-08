@@ -12,7 +12,6 @@ class AudioController(RpaeApp):
     def onMessage(self, message, origin):
         data = json.loads(message)
         if 'task' in data:
-            print(data)
             if data['task'] == "setVolume":
                 self._set_volume(origin, data)
 

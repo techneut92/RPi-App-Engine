@@ -2,6 +2,7 @@ class ExampleApp extends RpaeApp{
     constructor(){
         super('ExampleApp');                    // Set your AppID here
         this.host = 'ws://' + window.location.hostname + ':9738';    // Setting host will immediately start up the connection.
+        //this.openSocket();
     }
 
     onOpen(data){

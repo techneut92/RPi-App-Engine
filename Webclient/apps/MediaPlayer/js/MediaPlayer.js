@@ -1,12 +1,12 @@
 class MediaPlayer extends RpaeApp{
     constructor(){
         super('MediaPlayer');                    // Set your AppID here
-        this.host = 'ws://' + window.location.hostname + ':9738';    // Setting host will immediately start up the connection.
+        this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
+        //this.openSocket();
         this.playFile = null;
     }
 
     onOpen(data){
-        console.log('mediaplayer is active', data);
     }
 
     onMessage(message, origin){
@@ -56,7 +56,6 @@ class MediaPlayer extends RpaeApp{
     }
 
     onPeerDisconnect(peer){
-        console.log('Bye peer!', peer);
     }
 
     playStream(stream, name=null){

@@ -38,7 +38,7 @@ echo "SSH is not needed for the installation or functionality, however it's alwa
 SSH_EN=/etc/systemd/system/sshd.service
 SSH_ENABLED="null"
 if test -f "$SSH_EN"; then
-    echo -n "SSH is already enabled."
+    echo -n "SSH is already enabled.\n"
     #read a1
     #if [ "$a1" != "${a1#[Yy]}" ] ;then
     #    SSH_ENABLED = "FALSE"

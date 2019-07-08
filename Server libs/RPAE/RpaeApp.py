@@ -3,6 +3,7 @@ import json
 from ._peer import Peer
 import configparser
 import os
+import sys
 
 # defines
 _DEFAULT_HOST = 'ws://localhost:9738'
@@ -21,8 +22,8 @@ class RpaeApp(Peer):
     __peers = {}
 
     def __init__(self, configFile=_DEFAULT_CONFIG, configDir='./'):
-        cDir = os.path.basename(__file__)
-        print('TRYING TO GET THE APP INI DIR AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', cDir)
+        cDir = sys.path[0]
+        print('TRYING TO GET THE APP INI DIR AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', sys.path[0])
         configFile = cDir + '/' + configFile
         super().__init__(configFile=configFile)
         config = configparser.ConfigParser()

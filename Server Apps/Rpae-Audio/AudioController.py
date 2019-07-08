@@ -31,8 +31,8 @@ class AudioController(RpaeApp):
         """
         print('action 1.1', data)
         data['task'] = 'update'
-        print('action 1.2', data, origin.uid, origin)
-        data['origin'] = origin.uid
+        print('action 1.2', data, origin)
+        data['origin'] = origin
         print('action 2', data)
         if 'mixer' in data and 'value' in data and data['mixer'] != 'default':
             print('action 3', data)

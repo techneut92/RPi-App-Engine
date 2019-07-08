@@ -19,6 +19,7 @@ class RpaeAudio extends RpaeApp{
         if (message['task'] === 'init')
             this.init(message);
         else if (message['task'] === 'update'){
+            $('#rpae-volumeSlider').val( message['value']);
             console.log('update', message['value'])
         }
     }
@@ -28,6 +29,7 @@ class RpaeAudio extends RpaeApp{
         this.__resetVolumeAtStart = data['reset_volume_at_start'];
         this.__startupVolume = data['startup_volume'];
         this.__volume = data['volume'];
+        $('#rpae-volumeSlider').val(this.__volume);
         for (let key in data['mixers'])
             if (data['mixers'].hasOwnProperty(key))
                 this.__mixers[key] = new RpaeMixer(this, data['mixers'][key]);

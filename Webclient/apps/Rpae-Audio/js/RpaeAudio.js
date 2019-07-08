@@ -7,7 +7,7 @@ class RpaeAudio extends RpaeApp{
 
     constructor(){
         super('Rpae-Audio');                    // Set your AppID here
-        this.host = 'ws://localhost:9738';    // Setting host will immediately start up the connection.
+        this.host = 'ws://' + window.location.hostname + ':9738';    // Setting host will immediately start up the connection.
     }
 
     onOpen(data){

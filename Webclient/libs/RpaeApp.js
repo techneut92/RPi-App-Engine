@@ -16,7 +16,7 @@ class RpaeApp extends Peer{
         super(appID);
     }
 
-    __connectSocket(host="ws://localhost:9738") {
+    __connectSocket(host='ws://' + window.location.hostname + ':9738') {
         let ws = new WebSocket(host);
         ws.onopen = (event) => this.__onOpen(event);
         ws.onmessage = (message) => this.__handshake(message);

@@ -1,7 +1,7 @@
 class MediaPlayer extends RpaeApp{
     constructor(){
         super('MediaPlayer');                    // Set your AppID here
-        this.host = 'ws://localhost:9738';    // Setting host will immediately start up the connection.
+        this.host = 'ws://' + window.location.hostname + ':9738';    // Setting host will immediately start up the connection.
         this.playFile = null;
     }
 

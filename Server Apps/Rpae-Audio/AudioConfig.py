@@ -2,6 +2,7 @@ import threading
 import configparser
 import time
 import alsaaudio
+import sys
 
 
 class AudioConfig(configparser.ConfigParser):
@@ -11,7 +12,7 @@ class AudioConfig(configparser.ConfigParser):
         :param config_file: string, path to config file
         """
         configparser.ConfigParser.__init__(self, allow_no_value=True)
-        self._config_file = config_file
+        self._config_file = sys.path[0] + '/' + config_file
         self.read(self._config_file)
         self._update_list = []
         self._updater = threading.Thread(target=self._config_updater).start()

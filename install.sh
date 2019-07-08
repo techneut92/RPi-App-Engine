@@ -34,11 +34,10 @@ trap err_handler EXIT
 #################################################################################
 echo "The install of the raspberry pi app engine will now begin."
 # ask to enable/disable SSH
-echo "SSH is not needed for the installation or functionality, however it's always a good thing to have enabled."
 SSH_EN=/etc/systemd/system/sshd.service
 SSH_ENABLED="null"
 if test -f "$SSH_EN"; then
-    echo -n "SSH is already enabled.\n"
+    echo "SSH is already enabled.\n"
     #read a1
     #if [ "$a1" != "${a1#[Yy]}" ] ;then
     #    SSH_ENABLED = "FALSE"
@@ -142,5 +141,4 @@ fi
 rpae-server &
 python3 ./Server\ Apps/Rpae-Audio/AudioController.py &
 python3 ./Server\ Apps/MediaPlayer/MediaPlayer.py &
-chromium-browser localhost &
-
+chromium-browser http://localhost &

@@ -20,11 +20,11 @@ if [ $? -ne 0 ] ;then
     echo "An error has occured. Aborting installation. check Install.log for more info."
 else
     rm ./Install.log ./Install.log.bckp > ./Install.log 2>&1
-    echo -n "Installation completed. a reboot is required, reboot now? [y/n]: "
-    read rb
-    if [ "$rb" != "${rb#[Yy]}" ] ;then
-        reboot
-    fi
+    #echo -n "Installation completed. a reboot is required, reboot now? [y/n]: "
+    #read rb
+    #if [ "$rb" != "${rb#[Yy]}" ] ;then
+    #    reboot
+    #fi
 fi
 }
 trap err_handler EXIT
@@ -37,7 +37,7 @@ echo "The install of the raspberry pi app engine will now begin."
 SSH_EN=/etc/systemd/system/sshd.service
 SSH_ENABLED="null"
 if test -f "$SSH_EN"; then
-    echo "SSH is already enabled.\n"
+    echo "SSH is already enabled."
     #read a1
     #if [ "$a1" != "${a1#[Yy]}" ] ;then
     #    SSH_ENABLED = "FALSE"
@@ -133,9 +133,11 @@ cp -ar ./Webclient/* /var/www/html/
 
 ######## INSTALL SERVER LIBS ########
 RPLIBS=/usr/local/lib/python3*/dist-packages/RPAE
-if test -L "$RPLIBS"; then
+if [ -d "$RPLIBS" ]; then
     rm -rf /usr/local/lib/python3*/dist-packages/RPAE
 fi
+echo "Installing python libraries..."
+cp -ar ./Server\ libs/RPAE /usr/local/lib/python3*/dist-packages/
 
 # PROTOTYPE PRESENTATION, REMOVE LATER
 rpae-server &

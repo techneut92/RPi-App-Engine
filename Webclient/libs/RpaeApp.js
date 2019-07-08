@@ -58,6 +58,7 @@ class RpaeApp extends Peer{
         }
         catch (e){
             console.log('error parsing message in ' + this.__appID + ' uid: ' + this.uid);
+            console.log(message.data);
             console.log(e);
         }
 

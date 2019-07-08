@@ -12,21 +12,23 @@ class MediaPlayer extends RpaeApp{
     onMessage(message, origin){
         try{
             let msg = JSON.parse(message);
-            if (msg['playing']){
+            if (msg['playing'] && msg['action'] === undefined){
                 this.playFile = new IcyCast();
                 this.playFile.updateData(msg['fileData']);
-                console.log(msg['fileData'], this.playFile);
-                let d = this.playFile.name + ' - ' +this.playFile.title;
+                let d = this.playFile.name;
+                if (this.playFile.title !== '')
+                    d += ' ' + this.playFile.title;
                 $('#rpaePlayer-playing').text(d);
             }
-            else if (!msg['playing']) $('#rpaePlayer-playing').text('');
+            else if (!msg['playing'] && msg['action'] === undefined) $('#rpaePlayer-playing').text('');
             else if (msg['action'] === 'updateIcyData'){
                 this.playFile.updateData(msg);
                 let d;
-                if (this.playFile.name !== '')
-                    d = this.playFile.name + ' - ' + this.playFile.title;
-                else
-                    d = this.playFile.title;
+                if (this.playFile.name !== '') {
+                    if (this.playFile.title === '')d = this.playFile.name;
+                    else d = this.playFile.name + ' - ' + this.playFile.title;
+                }
+                else d = this.playFile.title;
                 $('#rpaePlayer-playing').text(d);
             }
         }catch (e) {

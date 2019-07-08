@@ -26,4 +26,13 @@ class IcyCast{
     get metaint() { return this.__metaint; }
     get bitrate() { return this.__bitrate; }
     get description() { return this.__description; }
+    get data() { return {
+        'name': this.__name,
+        'url': this.__url,
+        'genre': this.__genre,
+        'title': this.__title,
+        'metaint': this.__metaint,
+        'bitrate': this.__bitrate,
+        'description': this.__description
+    }}
 }

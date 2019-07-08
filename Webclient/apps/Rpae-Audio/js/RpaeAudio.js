@@ -41,6 +41,27 @@ class RpaeAudio extends RpaeApp{
         val = parseInt(val);
         if (val <= 100 && val >= 0){
             this.__volume = val;
+            $('#rpae-volumeSlider').val(this.__volume);
+            this.sendMessage(JSON.stringify({
+                'task': 'setVolume',
+                'value': val,
+                'mixer': 'default'
+            }))
+        }
+        else if(val < 0){
+            val = 0;
+            this.__volume = val;
+            $('#rpae-volumeSlider').val(this.__volume);
+            this.sendMessage(JSON.stringify({
+                'task': 'setVolume',
+                'value': val,
+                'mixer': 'default'
+            }))
+        }
+        else if (val > 100){
+            val = 100;
+            this.__volume = val;
+            $('#rpae-volumeSlider').val(this.__volume);
             this.sendMessage(JSON.stringify({
                 'task': 'setVolume',
                 'value': val,

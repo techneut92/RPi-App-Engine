@@ -10,12 +10,10 @@ class AudioController(RpaeApp):
         self._alsa_controller = AlsaController()
 
     def onMessage(self, message, origin):
-        print('message:', message)
         data = json.loads(message)
-        print('json:', data)
-        #if 'task' in data['data']:
-        #    if data['data']['task'] == "setVolume":
-        #        self._set_volume(origin, data)
+        if 'task' in data:
+            if data['task'] == "setVolume":
+                self._set_volume(origin, data)
 
     def onNewPeer(self, peer):
         status = self._get_status()
@@ -29,13 +27,14 @@ class AudioController(RpaeApp):
         :param data: dict with data
         :return: none
         """
-        # data['data']['update'] = True
-        if 'mixer' in data['data'] and 'value' in data['data'] and data['data']['mixer'] != 'default':
-            self._alsa_controller.mixers[data['data']['mixer']].volume = data['data']['value']
-            self.sendMessage(json.dumps(data['data']), 'all')
-        elif 'mixer' in data['data'] and 'value' in data['data'] and data['data']['mixer'] == 'default':
-            self._alsa_controller.volume = data['data']['value']
-            self.sendMessage(json.dumps(data['data']), 'all')
+        data['task'] = 'update'
+        data['origin'] = origin.uid
+        if 'mixer' in data and 'value' in data and data['mixer'] != 'default':
+            self._alsa_controller.mixers[data['mixer']].volume = data['value']
+            self.sendMessage(json.dumps(data), 'clientApp')
+        elif 'mixer' in data and 'value' in data and data['mixer'] == 'default':
+            self._alsa_controller.volume = data['value']
+            self.sendMessage(json.dumps(data))
         else:
             print("Invalid package received: ", data)
             data['task'] = 'ERROR'

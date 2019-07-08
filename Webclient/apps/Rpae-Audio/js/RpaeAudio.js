@@ -35,7 +35,11 @@ class RpaeAudio extends RpaeApp{
     set volume(val) {
         if (0 < val < 100){
             this.__volume = val;
-            
+            this.sendMessage(JSON.stringify({
+                'task': 'setVolume',
+                'value': val,
+                'mixer': 'default'
+            }))
         }
     }
 }

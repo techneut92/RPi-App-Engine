@@ -3,7 +3,7 @@ class RpaeApp extends Peer{
     __APPTYPE = 'clientApp';
 
     __websocket = null;
-    __host = null;
+    __host = 'ws://' + window.location.hostname + ':9738';
     __peers = {};
     connected = false;
     __isReady = false;

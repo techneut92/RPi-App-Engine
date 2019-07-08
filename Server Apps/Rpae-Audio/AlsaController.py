@@ -1,6 +1,6 @@
 import alsaaudio
-from .Mixer import Mixer
-from .AudioConfig import AudioConfig
+from Mixer import Mixer
+from AudioConfig import AudioConfig
 
 
 class AlsaController:

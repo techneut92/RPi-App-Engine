@@ -1,5 +1,5 @@
 from RPAE import RpaeApp
-from .AlsaController import AlsaController
+from AlsaController import AlsaController
 
 
 class AudioController(RpaeApp):

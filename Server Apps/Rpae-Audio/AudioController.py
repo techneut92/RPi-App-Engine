@@ -10,11 +10,12 @@ class AudioController(RpaeApp):
         self._alsa_controller = AlsaController()
 
     def onMessage(self, message, origin):
-        print(message)
+        print('message:', message)
         data = json.loads(message)
-        if 'task' in data['data']:
-            if data['data']['task'] == "setVolume":
-                self._set_volume(origin, data)
+        print('json:', data)
+        #if 'task' in data['data']:
+        #    if data['data']['task'] == "setVolume":
+        #        self._set_volume(origin, data)
 
     def onNewPeer(self, peer):
         status = self._get_status()
@@ -28,7 +29,7 @@ class AudioController(RpaeApp):
         :param data: dict with data
         :return: none
         """
-        data['data']['update'] = True
+        # data['data']['update'] = True
         if 'mixer' in data['data'] and 'value' in data['data'] and data['data']['mixer'] != 'default':
             self._alsa_controller.mixers[data['data']['mixer']].volume = data['data']['value']
             self.sendMessage(json.dumps(data['data']), 'all')
@@ -38,7 +39,7 @@ class AudioController(RpaeApp):
         else:
             print("Invalid package received: ", data)
             data['task'] = 'ERROR'
-            self.sendMessage(json.dumps(data), origin.appType, origin.uid)
+            # self.sendMessage(json.dumps(data), origin.appType, origin.uid)
 
     def _get_status(self):
         """

@@ -1,0 +1,31 @@
+#############################################################################################
+# General settings for all non declared mixers                                              #
+# reset_volume_at_start: 1: Reset the volume to the startup_volume                          #
+#                        0: Keep the volumes on the last known setting when program starts  #
+# startup_volume:        Value between 0 and 100. is ignored if reset_volume_at_start = 0   #
+# volume:                Last known volume.
+#############################################################################################
+
+#############################################################################################
+# Devices available at startup are automatically generated.                                 #
+# If no devices are available you either didn't start the audiomanager once or you don't    #
+# have any sound devices available                                                          #
+# Be aware: you might lose changes if the audiomanager is still running while editing this  #
+# file. Preferable close the whole server before editing devices.                           #
+#                                                                                           #
+# [hw:x]: section for your hardware device's settings                                       #
+# easy_name:      as the name suggest, this is the easy name for said device                #
+#                 default: same name as the section                                         #
+# volume:         Last known volume setting for this mixer                                  #
+# joined_volume:  All general volume control command will be received by this mixer         #
+#                 default: 1                                                                #
+#                 0: volume control has to be directed to the specific mixer                #
+#                 1: all general volume commands are also send to this mixer                #
+# startup_volume: Overrides the audio startup_volume, ignored if joined_volume = 1          #
+#                                                                                           #
+# If 2 or more channels are available the following options will also appear                #
+# channel_x_name: Easy name for the channel.  defaults to 'channel x'                       #
+# channel_x:      The balance value for a channel. A channel might be a right or left side  #
+#                 on a stereo output                                                        #
+#                 value from 0 to 10. default: 5                                            #
+#############################################################################################

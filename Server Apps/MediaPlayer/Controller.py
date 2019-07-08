@@ -14,7 +14,11 @@ class Controller(RpaeApp):
     def onMessage(self, message, origin):
         print("new message from uid:", origin['uid'], "message:", message)
         if message.startswith('PLAY'):
-            self.mediaPlayer.play(message.split(' ')[1])
+            msg = message.split(' ')
+            if len(msg) > 2:
+                self.mediaPlayer.play(file=msg[1], name=msg[2])
+            else:
+                self.mediaPlayer.play(file=msg[1])
         elif message == 'STOP':
             self.mediaPlayer.stop()
 

@@ -24,7 +24,7 @@ class MediaPlayer:
     def __del__(self):
         self.stop()
 
-    def play(self, file):
+    def play(self, file, name=None):
         if self.isPlaying:
             self.stop()
         shell = False
@@ -34,7 +34,7 @@ class MediaPlayer:
                                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                                 preexec_fn=os.setsid)
         self.__playingFile = file
-        self.__fillFileData(file)
+        self.__fillFileData(file, name)
 
     def stop(self):
         os.killpg(os.getpgid(self.__playerProcess.pid), signal.SIGTERM)
@@ -42,9 +42,9 @@ class MediaPlayer:
         self.__playingFile = None
         self.__playerProcess = None
 
-    def __fillFileData(self, file):
+    def __fillFileData(self, file, name=None):
         if file.lower().startswith('http://') or file.lower().startswith('https://'):
-            self.__fileData = IcyData(r_url=file, onUpdate=self.__onIcyUpdate)
+            self.__fileData = IcyData(r_url=file, onUpdate=self.__onIcyUpdate, name=name)
 
     def __onIcyUpdate(self, data):
         data['action'] = 'updateIcyData'

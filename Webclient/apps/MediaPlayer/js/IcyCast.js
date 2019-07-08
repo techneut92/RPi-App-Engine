@@ -10,13 +10,13 @@ class IcyCast{
     }
 
     updateData(data){
-        this.__name = data.name;
-        this.__url = data.url;
-        this.__genre = data.genre;
-        this.__title = data.title;
-        this.__metaint = data.metaint;
-        this.__bitrate = data.bitrate;
-        this.__description = data.description;
+        this.__name = data['name'];
+        this.__url = data['url'];
+        this.__genre = data['genre'];
+        this.__title = data['title'];
+        this.__metaint = data['metaint'];
+        this.__bitrate = data['bitrate'];
+        this.__description = data['description'];
     }
 
     get name() { return this.__name; }

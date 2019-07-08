@@ -19,7 +19,9 @@ class IcyData:
     __close = False
     __audioData = None
 
-    def __init__(self, r_url, onUpdate):
+    def __init__(self, name=None, r_url=None, onUpdate=None):
+        if name is not None:
+            self.__name = name
         self.__requestUrl = r_url
         self.__detectEncoding()
         self.__updateThread = Thread(target=self.__requestData, daemon=True)

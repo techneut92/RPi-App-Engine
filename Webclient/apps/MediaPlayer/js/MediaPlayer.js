@@ -12,17 +12,26 @@ class MediaPlayer extends RpaeApp{
     onMessage(message, origin){
         try{
             let msg = JSON.parse(message);
-            if (msg['action'] === 'sendStatus'){
+            if (msg['playing'] === true){
                 this.playFile = new IcyCast();
-                this.playFile.updateData(msg);
+                this.playFile.updateData(msg['fileData']);
+                console.log(msg['fileData'], this.playFile);
+                let d = this.playFile.name + ' - ' +this.playFile.title;
+                $('#rpaePlayer-playing').text(d);
             }
             else if (msg['action'] === 'updateIcyData'){
                 this.playFile.updateData(msg);
+                let d;
+                if (this.playFile.name !== '')
+                    d = this.playFile.name + ' - ' + this.playFile.title;
+                else
+                    d = this.playFile.title;
+                $('#rpaePlayer-playing').text(d);
             }
         }catch (e) {
 
         }
-        console.log(message, origin);
+        //console.log(message, origin);
     }
 
     onClose(data){
@@ -34,6 +43,11 @@ class MediaPlayer extends RpaeApp{
     }
 
     onNewPeer(peer){
+        if (peer.appType === 'clientApp' && this.playFile != null){
+            let msg = this.playFile.data;
+            msg['action'] = 'sendStatus';
+            this.sendMessage(JSON.stringify(msg));
+        }
         console.log('New peer connected to mediaplayer with uid:', peer.uid, 'app type:', peer.appType);
 
     }
@@ -42,8 +56,11 @@ class MediaPlayer extends RpaeApp{
         console.log('Bye peer!', peer);
     }
 
-    playStream(stream){
-        this.sendMessage('PLAY '+stream);
+    playStream(stream, name=null){
+        if (name == null)
+            this.sendMessage('PLAY '+stream);
+        else
+            this.sendMessage('PLAY '+stream+' '+name);
     }
 
     stop(){

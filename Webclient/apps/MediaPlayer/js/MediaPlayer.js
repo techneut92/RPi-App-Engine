@@ -12,13 +12,14 @@ class MediaPlayer extends RpaeApp{
     onMessage(message, origin){
         try{
             let msg = JSON.parse(message);
-            if (msg['playing'] === true){
+            if (msg['playing']){
                 this.playFile = new IcyCast();
                 this.playFile.updateData(msg['fileData']);
                 console.log(msg['fileData'], this.playFile);
                 let d = this.playFile.name + ' - ' +this.playFile.title;
                 $('#rpaePlayer-playing').text(d);
             }
+            else if (!msg['playing']) $('#rpaePlayer-playing').text('');
             else if (msg['action'] === 'updateIcyData'){
                 this.playFile.updateData(msg);
                 let d;

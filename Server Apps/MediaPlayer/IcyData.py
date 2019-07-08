@@ -16,12 +16,14 @@ class IcyData:
     __headers = None
     __updateThread = None
     __onUpdate = None
+    __onInit = None
     __close = False
     __audioData = None
 
-    def __init__(self, name=None, r_url=None, onUpdate=None):
+    def __init__(self, name=None, r_url=None, onUpdate=None, onInit=None):
         if name is not None:
             self.__name = name
+        self.__onInit = onInit
         self.__requestUrl = r_url
         self.__detectEncoding()
         self.__updateThread = Thread(target=self.__requestData, daemon=True)
@@ -52,7 +54,7 @@ class IcyData:
         self.__genre = self.__headers['icy-genre']
         self.__bitrate = self.__headers['icy-br']
         audio_length = self.__metaint
-        self.__onUpdate(self.data)
+        self.__onInit()
         while not self.__close:
             self.__audio_data = stream.read(audio_length)  # not being used atm
             meta_byte = stream.read(1)

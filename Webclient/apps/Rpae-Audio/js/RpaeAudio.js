@@ -16,8 +16,10 @@ class RpaeAudio extends RpaeApp{
 
     onMessage(message){
         message = JSON.parse(message);
-        if (message['task'] === 'init'){
-            this.init(message)
+        if (message['task'] === 'init')
+            this.init(message);
+        else if (message['task'] === 'update'){
+            console.log('update', message['value'])
         }
     }
 
@@ -33,7 +35,8 @@ class RpaeAudio extends RpaeApp{
 
     get volume() { return this.__volume; }
     set volume(val) {
-        if (0 < val < 100){
+        val = parseInt(val);
+        if (val <= 100 && val >= 0){
             this.__volume = val;
             this.sendMessage(JSON.stringify({
                 'task': 'setVolume',

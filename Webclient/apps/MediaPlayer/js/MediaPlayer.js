@@ -68,5 +68,6 @@ class MediaPlayer extends RpaeApp{
 
     stop(){
         this.sendMessage('STOP');
+        $('#rpaePlayer-playing').text('');
     }
 }

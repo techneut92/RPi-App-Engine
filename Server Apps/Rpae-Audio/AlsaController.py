@@ -108,11 +108,14 @@ class AlsaController:
 
     @volume.setter
     def volume(self, value):
-        self._volume = value
-        self.config.update_value("audio", "volume", str(value))
-        for mix in self.mixers.values():
-            if mix.joined_volume:
-                mix.volume = value
+        if 0 <= int(value) <= 100:
+            self._volume = value
+            self.config.update_value("audio", "volume", str(value))
+            for mix in self.mixers.values():
+                if mix.joined_volume:
+                    mix.volume = value
+        else:
+            print('invalid volume variable;', value)
 
     @property
     def reset_volume_at_start(self):

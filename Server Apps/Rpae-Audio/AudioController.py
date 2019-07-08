@@ -17,6 +17,11 @@ class AudioController(RpaeApp):
                 print('action 1')
                 self._set_volume(origin, data)
 
+    def onOpen(self):
+        status = self._get_status()
+        status['task'] = "init"
+        self.sendMessage(json.dumps(status))
+
     def onNewPeer(self, peer):
         status = self._get_status()
         status['task'] = "init"
@@ -29,17 +34,12 @@ class AudioController(RpaeApp):
         :param data: dict with data
         :return: none
         """
-        print('action 1.1', data)
         data['task'] = 'update'
-        print('action 1.2', data, origin)
         data['origin'] = origin
-        print('action 2', data)
         if 'mixer' in data and 'value' in data and data['mixer'] != 'default':
-            print('action 3', data)
             self._alsa_controller.mixers[data['mixer']].volume = data['value']
             self.sendMessage(json.dumps(data), 'clientApp')
         elif 'mixer' in data and 'value' in data and data['mixer'] == 'default':
-            print('action 4', data)
             self._alsa_controller.volume = data['value']
             self.sendMessage(json.dumps(data))
         else:

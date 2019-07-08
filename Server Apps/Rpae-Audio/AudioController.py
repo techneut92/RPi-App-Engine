@@ -12,7 +12,9 @@ class AudioController(RpaeApp):
     def onMessage(self, message, origin):
         data = json.loads(message)
         if 'task' in data:
+            print(data)
             if data['task'] == "setVolume":
+                print('action 1')
                 self._set_volume(origin, data)
 
     def onNewPeer(self, peer):
@@ -29,10 +31,13 @@ class AudioController(RpaeApp):
         """
         data['task'] = 'update'
         data['origin'] = origin.uid
+        print('action 2', data)
         if 'mixer' in data and 'value' in data and data['mixer'] != 'default':
+            print('action 3', data)
             self._alsa_controller.mixers[data['mixer']].volume = data['value']
             self.sendMessage(json.dumps(data), 'clientApp')
         elif 'mixer' in data and 'value' in data and data['mixer'] == 'default':
+            print('action 4', data)
             self._alsa_controller.volume = data['value']
             self.sendMessage(json.dumps(data))
         else:

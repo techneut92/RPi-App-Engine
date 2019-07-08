@@ -1,5 +1,6 @@
 from RPAE import RpaeApp
 from AlsaController import AlsaController
+import json
 
 
 class AudioController(RpaeApp):
@@ -8,7 +9,8 @@ class AudioController(RpaeApp):
         self.name = "AudioController"
         self._alsa_controller = AlsaController()
 
-    def parse_data(self, data: dict):
+    def onMessage(self, message, origin):
+        data = json.loads(message)
         origin = data["origin"]
         del data['origin']
         if 'task' in data['data']:
@@ -18,7 +20,7 @@ class AudioController(RpaeApp):
     def onNewPeer(self, peer):
         status = self._get_status()
         status['task'] = "init"
-        self.sendMessage(status, peer.appType, peer.uid)
+        self.sendMessage(json.dumps(status), peer.appType, peer.uid)
 
     def _set_volume(self, origin, data: dict):
         """
@@ -30,14 +32,14 @@ class AudioController(RpaeApp):
         data['data']['update'] = True
         if 'mixer' in data['data'] and 'value' in data['data'] and data['data']['mixer'] != 'default':
             self._alsa_controller.mixers[data['data']['mixer']].volume = data['data']['value']
-            self.sendMessage(data['data'], 'all')
+            self.sendMessage(json.dumps(data['data']), 'all')
         elif 'mixer' in data['data'] and 'value' in data['data'] and data['data']['mixer'] == 'default':
             self._alsa_controller.volume = data['data']['value']
-            self.sendMessage(data['data'], 'all')
+            self.sendMessage(json.dumps(data['data']), 'all')
         else:
             print("Invalid package received: ", data)
             data['task'] = 'ERROR'
-            self.sendMessage(data, origin.appType, origin.uid)
+            self.sendMessage(json.dumps(data), origin.appType, origin.uid)
 
     def _get_status(self):
         """

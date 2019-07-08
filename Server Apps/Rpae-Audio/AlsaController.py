@@ -1,12 +1,13 @@
 import alsaaudio
 from Mixer import Mixer
 from AudioConfig import AudioConfig
+import os
 
 
 class AlsaController:
     def __init__(self):
         # TODO file path management ?
-        self._cfg_file = 'apps/AudioController/audio.ini'
+        self._cfg_file = 'audio.ini'
         self._config = AudioConfig(self.cfg_file)
         self._config.validate_ini()
         self.mixers = self._get_mixers()

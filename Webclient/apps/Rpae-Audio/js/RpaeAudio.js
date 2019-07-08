@@ -7,7 +7,8 @@ class RpaeAudio extends RpaeApp{
 
     constructor(){
         super('Rpae-Audio');                    // Set your AppID here
-        this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
+        //this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
+        this.openSocket();
     }
 
     onOpen(data){

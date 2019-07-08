@@ -1,8 +1,8 @@
 class MediaPlayer extends RpaeApp{
     constructor(){
         super('MediaPlayer');                    // Set your AppID here
-        this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
-        //this.openSocket();
+        //this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
+        this.openSocket();
         this.playFile = null;
     }
 

@@ -175,6 +175,7 @@ class RpaeApp extends Peer{
     get peers() { return this.__peers; }
     get isReady() {return this.__isReady; }
     get isConnected() { return this.__connected; }
+    get name() { return this.__appID; }
 
     get host() {return this.__host;}
     set host(value){

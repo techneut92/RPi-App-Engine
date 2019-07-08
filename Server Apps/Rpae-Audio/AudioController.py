@@ -10,9 +10,8 @@ class AudioController(RpaeApp):
         self._alsa_controller = AlsaController()
 
     def onMessage(self, message, origin):
+        print(message)
         data = json.loads(message)
-        origin = data["origin"]
-        del data['origin']
         if 'task' in data['data']:
             if data['data']['task'] == "setVolume":
                 self._set_volume(origin, data)

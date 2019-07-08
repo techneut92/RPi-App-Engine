@@ -14,6 +14,9 @@
     <script type="text/javascript" src="libs/RpaeApp.js"></script>
     <script type="text/javascript" src="apps/MediaPlayer/js/IcyCast.js"></script>
     <script type="text/javascript" src="apps/MediaPlayer/js/MediaPlayer.js"></script>
+    <script type="text/javascript" src="apps/Rpae-Audio/js/RpaeMixer.js"></script>
+    <script type="text/javascript" src="apps/Rpae-Audio/js/RpaeChannel.js"></script>
+    <script type="text/javascript" src="apps/Rpae-Audio/js/RpaeAudio.js"></script>
     <title>RPAE</title>
     <style>
         body, html{
@@ -25,6 +28,7 @@
 <body>
 <script>
     mediaPlayer = new MediaPlayer();
+    rpaeAudio = new RpaeAudio();
 </script>
 <button onclick="mediaPlayer.playStream('https://21253.live.streamtheworld.com/SLAM_MP3_SC?')">Play Slam!</button>
 <button onclick="mediaPlayer.playStream('http://18973.live.streamtheworld.com/RADIO538.mp3', '538')">Play 538</button>

@@ -34,6 +34,7 @@ class MediaPlayer:
                                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                                 preexec_fn=os.setsid)
         self.__playingFile = file
+        print('GOING TO FILL FILEDATA:', file, name)
         self.__fillFileData(file, name)
 
     def stop(self):
@@ -45,6 +46,7 @@ class MediaPlayer:
     def __fillFileData(self, file, name=None):
         if file.lower().startswith('http://') or file.lower().startswith('https://'):
             self.__fileData = IcyData(r_url=file, onUpdate=self.__onIcyUpdate, name=name)
+            print(self.__fileData)
 
     def __onIcyUpdate(self, data):
         data['action'] = 'updateIcyData'
@@ -62,11 +64,16 @@ class MediaPlayer:
         self.__controller.sendMessage(self.status, peer.appType, peer.uid)
 
     @property
+    def playing(self):
+        return self.__playingFile is not None
+
+    @property
     def status(self):
         data = {
-            'playing': True,
-            'fileData': self.__fileData.data
+            'playing': self.playing,
         }
+        if self.playing:
+            data['fileData'] = self.__fileData.data
         return json.dumps(data)
 
 

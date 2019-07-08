@@ -16,8 +16,10 @@ class Controller(RpaeApp):
         if message.startswith('PLAY'):
             msg = message.split(' ')
             if len(msg) > 2:
+                print('PLAYING WITH SELF SET NAME', msg)
                 self.mediaPlayer.play(file=msg[1], name=msg[2])
             else:
+                print('NO SELF SET NAME')
                 self.mediaPlayer.play(file=msg[1])
         elif message == 'STOP':
             self.mediaPlayer.stop()

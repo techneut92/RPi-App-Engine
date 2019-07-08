@@ -1,7 +1,7 @@
 class ExampleApp extends RpaeApp{
     constructor(){
         super('ExampleApp');                    // Set your AppID here
-        this.host = 'ws://192.168.2.8:9738';    // Setting host will immediately start up the connection.
+        this.host = 'ws://localhost:9738';    // Setting host will immediately start up the connection.
     }
 
     onOpen(data){

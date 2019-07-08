@@ -29,18 +29,20 @@ fi
 }
 trap err_handler EXIT
 
-####### TODO ASK ALL QUESTIONS HERE #######
+#################################################################################
+#######                      ASK ALL QUESTIONS HERE                       #######
+#################################################################################
 echo "The install of the raspberry pi app engine will now begin."
 # ask to enable/disable SSH
 echo "SSH is not needed for the installation or functionality, however it's always a good thing to have enabled."
 SSH_EN=/etc/systemd/system/sshd.service
 SSH_ENABLED="null"
 if test -f "$SSH_EN"; then
-    echo -n "SSH is already enabled. Disable SSH? [y/n]: "
-    read a1
-    if [ "$a1" != "${a1#[Yy]}" ] ;then
-        SSH_ENABLED = "FALSE"
-    fi
+    echo -n "SSH is already enabled."
+    #read a1
+    #if [ "$a1" != "${a1#[Yy]}" ] ;then
+    #    SSH_ENABLED = "FALSE"
+    #fi
 else
     echo -n "SSH is disabled. Enable ssh? [y/n]: "
     read a2
@@ -49,44 +51,27 @@ else
     fi
 fi
 
-# TODO ask SSL self-signed keys
-#SSL_EN=/etc/rpae/ssl/rpi-app-engine.crt
-#SSL_ENABLED="FALSE"
-#if test -f "$SSL_EN"; then
-#    echo "SSL keys already generated..."
-#    SSL_ENABLED="TRUE"
+# TODO ask openbox full screen chromium
+#OBOX_FULL="null"
+#echo "If you only run the webclient and nothing else on this raspberry pi it's a good practice to set up openbox with the rpae GUI full screen. If you still wish to use other apps it's best to select 'n'"
+#echo -n "Do you wish to install openbox with the full screen rpae GUI? [y/n]: "
+#read ofs
+#if [ "$ofs" != "${ofs#[Yy]}" ]; then
+#    OBOX_FULL="TRUE"
 #else
-#    echo -n "Generate self-signed SSL keys now (You can always do this later manually)? [y/n]: "
-#    read a4
-#    if [ "$a4" != "${a4#[Yy]}" ] ;then
-#        SSL_ENABLED="TRUE"
-#        echo "Generating ssl keypair for secure websocket connections. \nplease fill in the required settings..."
-#        openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/rpae/ssl/rpi-app-engine.key -out /etc/rpae/ssl/rpi-app-engine.crt
-#        chmod 600 /etc/rpae/ssl/*
-#    fi
+#    OBOX_FULL="FALSE"
 #fi
 
-# TODO ask openbox full screen chromium
-OBOX_FULL="null"
-echo "If you only run the webclient and nothing else on this raspberry pi it's a good practice to set up openbox with the rpae GUI full screen. If you still wish to use other apps it's best to select 'n'"
-echo -n "Do you wish to install openbox with the full screen rpae GUI? [y/n]: "
-read ofs
-if [ "$ofs" != "${ofs#[Yy]}" ]; then
-    OBOX_FULL="TRUE"
-else
-    OBOX_FULL="FALSE"
-fi
-
 # TODO ask unclutter
-UNCLUTTER="null"
-echo "Unclutter is a program that removes the mouse from the screen for usage with touch screens."
-echo -n "Do you wish to install unclutter? [y/n]: "
-read unc
-if [ "$unc" != "${unc#[Yy]}" ]; then
-    UNCLUTTER="TRUE"
-else
-    UNCLUTTER="FALSE"
-fi
+#UNCLUTTER="null"
+#echo "Unclutter is a program that removes the mouse from the screen for usage with touch screens."
+#echo -n "Do you wish to install unclutter? [y/n]: "
+#read unc
+#if [ "$unc" != "${unc#[Yy]}" ]; then
+#    UNCLUTTER="TRUE"
+#else
+#    UNCLUTTER="FALSE"
+#fi
 
 #Run the updates
 echo "Running apt-get update..."
@@ -135,28 +120,27 @@ mkdir -p /etc/rpae/server > ./Install.log
 cp ./Server/server.ini /etc/rpae/server/ > ./Install.log
 
 ######## TODO CREATE SERVICE ###############
-echo "Creating Server service..."
+#echo "Creating Server service..."
 
 ######## TODO SET BOOTUP TO OPENBOX AND AUTO OPEN IN FULLSCREEN CHROMIUM #######
-if [ "$OBOX_FULL" == "TRUE" ];then
-    echo "Installing openbox..."
-fi
+#if [ "$OBOX_FULL" == "TRUE" ];then
+#    echo "Installing openbox..."
+#fi
 ######## TODO SET UNCLUTTER #########
 
 ######## TODO INSTALL WEBCLIENT ########
+rm -rf /var/www/html/*
+cp ./Webclient/* /var/www/html/
 
-######## TODO INSTALL SERVER APPS ########
+######## INSTALL SERVER LIBS ########
+RPLIBS=/usr/local/lib/python3*/dist-packages/RPAE
+if test -L "$RPLIBS"; then
+    rm -rf /usr/local/lib/python3*/dist-packages/RPAE
+fi
 
-######## TODO SET UP APACHE2 SSL ########
-#if [ "$SSL_ENABLED" == "TRUE" ]; then
-#    echo "Setting up apache2 with SSL..."
-#    a2enmod ssl > Install.log
-#    systemctl restart apache2 > Install.log
-#    if test -f "./Install/rpae.conf"; then
-#        cp ./Install/rpae.conf /etc/apache2/sites-available/
-#    fi
-#fi
-
-######## TODO SET UP RPAE-CLI ########
-
+# PROTOTYPE PRESENTATION, REMOVE LATER
+rpae-server &
+python3 ./Server\ Apps/Rpae-Audio/AudioController.py &
+python3 ./Server\ Apps/MediaPlayer/MediaPlayer.py &
+chromium-browser localhost &
 

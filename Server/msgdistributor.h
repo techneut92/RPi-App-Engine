@@ -26,7 +26,6 @@ private:
 private Q_SLOTS:
 
 signals:
-    void msgToSend(QString target, QString message);
 
 public slots:
     void processTextMessages(QString message, Client* origin);

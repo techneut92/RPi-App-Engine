@@ -17,17 +17,17 @@ public:
     QMap<QString, QList<int>> getSortedClients();
     void appendClient(Client* c);
 
+private Q_SLOTS:
+    void connectApp(Client *c);
+    void onDisconnect(Client *c);
+
 private:
     MsgDistributor *msgDistributor;
     QMap<int, Client*> u_clients;
-    //QMap<QString, QMap<int, Client*>> cc_clients;   // clients connected in a qmap for easy access
     QMap<int, Client*> cc_clients;
     QMap<QString, QList<int>> sorted_uids;
     int uidCounter = 0;
-    //QList<int> uidTaken;
 
-    void connectApp(Client *c);
-    void onDisconnect(Client *c);
     int getNewUid();
     bool uidTaken(int uid);
     QString getClientsPackage(QString id, int excluded_uid);

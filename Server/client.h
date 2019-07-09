@@ -28,16 +28,16 @@ public:
     explicit Client(QWebSocket *cl, QObject *parent = nullptr);
     ~Client() override;                             // Override function on the destroyer to make sure all connections are closed.
 
-    QString getId() const;                          // Get function for the app id
-    bool awaiting_handshake();                      // Returns the opposite of handshake_succes
-    AppType appType();                              // Get function for app_type
-    ConnectionType connectionType();                // Get function for con_type
     int uid;                                        // optional unique id
-    void sendTextMessage(QString message);          // Function to send a text message over the websocket
-    void sendBinaryMessage(QByteArray message);     // Send a binary message over the websocket
+    QString getId() const;                          // Get function for the app id
     QString getPeerAddress();                       // Returns the peerAddress
     QString getOrigin();                            // Returns the origin
     QString getPeerName();                          // Returns the peerName
+    AppType appType();                              // Get function for app_type
+    ConnectionType connectionType();                // Get function for con_type
+    bool awaiting_handshake();                      // Returns the opposite of handshake_succes
+    void sendTextMessage(QString message);          // Function to send a text message over the websocket
+    void sendBinaryMessage(QByteArray message);     // Send a binary message over the websocket
 
 private:
     QString id;                                     // Contains the app ID.

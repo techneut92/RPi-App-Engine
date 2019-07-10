@@ -5,7 +5,7 @@ class RpaeApp extends Peer{
     __websocket = null;
     __host = 'ws://' + window.location.hostname + ':9738';
     __peers = {};
-    connected = false;
+    //connected = false;
     __isReady = false;
     __recQueue = [];
     __sendQueue = [];
@@ -170,11 +170,12 @@ class RpaeApp extends Peer{
     onError(err) {}
     onNewPeer(peer) {}
     onPeerDisconnect() {}
+    onMessage(message, peer) {}
 
     get appTypes() { return this.__appTypes; }
     get peers() { return this.__peers; }
     get isReady() {return this.__isReady; }
-    get isConnected() { return this.__connected; }
+    //get isConnected() { return this.__connected; }
     get name() { return this.__appID; }
 
     get host() {return this.__host;}

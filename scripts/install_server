@@ -1,0 +1,150 @@
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "$SCRIPT_NAME: This script must be run as root" 1>&2
+   exit 1
+fi
+
+SCRIPT_NAME="Rpae Server Installer"
+EXIT_CODE=0
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$SCRIPT_DIR/../Server"
+INIT_DIR=$(pwd)
+OLD_DIR=$(pwd)
+cd "$ROOT_DIR"
+
+#do all echoes in bold and green and let us know this is the rpae server installer
+echo ""
+echo -e "\e[32m#################################################################"
+echo "# $SCRIPT_NAME                                         #"
+echo "#################################################################"
+echo ""
+
+#compile code into /opt/rpae-server
+cd "$ROOT_DIR"
+qmake Server.pro > /dev/null
+find . -exec touch {} \;
+make -j4 &> /dev/null &
+pid=$!
+trap "kill $pid 2> /dev/null" EXIT
+while kill -0 $pid &> /dev/null
+do
+    echo -ne "$SCRIPT_NAME: Compiling Server.  \r"
+    sleep 1
+    echo -ne "$SCRIPT_NAME: Compiling Server.. \r"
+    sleep 1
+    echo -ne "$SCRIPT_NAME: Compiling Server...\r"
+    sleep 1
+done
+if  test -f "$ROOT_DIR"/Server ; then
+    echo "$SCRIPT_NAME: Compiling Server done..."
+else
+    EXIT_CODE=255
+    echo -e "\e[31m$SCRIPT_NAME: CRITICAL ERROR: Compiling server failed..."
+    echo "    Try compiling manually by heading into the Server directory"
+    echo "    From there run 'qmake Server.pro && make -j4'"
+    echo "    if this works retry the installation or set up the service manually."
+    if [[ $(systemctl is-enabled rpae-server) == "enabled" ]]; then
+        echo -e "\e[33m$SCRIPT_NAME: The old rpae-server service is still enabled."
+        echo "    The older server might be incompatible with the newer RPAE"
+    fi
+    echo -e "$SCRIPT_NAME: exiting installation...\e[32m"
+    cd "$INIT_DIR"
+    echo -e "#################################################################\n"
+    exit $EXIT_CODE
+fi
+echo "$SCRIPT_NAME: Cleaning server..."
+make clean -j4 > /dev/null
+rm -rf Makefile .qmake.stash ||:
+
+#make a symlink to the server.ini
+if test -f "/etc/rpae/server/server.ini"; then
+    echo "$SCRIPT_NAME: Creating backup of server.ini into /etc/rpae/server..."
+    cp /etc/rpae/server/server.ini /etc/rpae/server/server.ini.backup
+fi
+echo "$SCRIPT_NAME: Copy server.ini into /etc/rpae/server..."
+if [ ! -f $ROOT_DIR/server.ini.example ]; then
+    cp "$ROOT_DIR/server.ini" /etc/rpae/server/
+else
+    cp "$ROOT_DIR/server.ini.example" /etc/rpae/server/server.ini
+fi
+
+# check if old service is running and remove
+if [[ $(systemctl is-enabled rpae-server) == "enabled" ]]; then
+    if [[ $(systemctl is-active rpae-server) == "active" ]]; then
+        echo -e "\e[33m$SCRIPT_NAME: Stopping rpae-server service...\e[32m"
+        systemctl stop rpae-server
+    fi
+    echo -e "\e[33m$SCRIPT_NAME: Disabling rpae-server service...\e[32m"
+    systemctl disable rpae-server &> /dev/null
+fi
+
+# move the server to /use/bin as rpae-server and remove files
+if [ -e "/usr/bin/rpae-server" ]; then
+    echo -e "\e[33m$SCRIPT_NAME: Remove rpae-server from /usr/bin...\e[32m"
+    rm -rf /usr/bin/rpae-server ||:
+fi
+echo "$SCRIPT_NAME: Create symbolic link of rpae-server in /usr/bin..."
+ln -s "$ROOT_DIR/Server" /usr/bin/rpae-server
+
+if [ -f "etc/systemd/system/rpae-server.service" ]; then
+    echo "$SCRIPT_NAME: Removing rpae-server.service file..."
+    rm -rf etc/systemd/system/rpae-server.service ||:
+fi
+
+#create new rpae-server service
+echo "$SCRIPT_NAME: Generating new rpae-server.service file..."
+touch /etc/systemd/system/rpae-server.service
+cat <<EOF > /etc/systemd/system/rpae-server.service
+[Unit]
+Description=rpae server
+Wants=network.target
+After=syslog.target network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/rpae-server
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload &> /dev/null
+echo "$SCRIPT_NAME: Enabling the rpae-server service..."
+systemctl enable rpae-server.service &> /dev/null
+echo "$SCRIPT_NAME: Start the rpae-server service..."
+systemctl start rpae-server.service
+
+if [[ $(systemctl is-active rpae-server) == "active" ]]; then
+    echo "$SCRIPT_NAME: Service rpae-server is now running..."
+else
+echo -ne "\e[91m"
+    echo "$SCRIPT_NAME: CRITICAL ERROR: can not start rpae-server service..."
+    echo "    This error is caused by a faulty /etc/systemd/system/rpae-server.service file."
+    echo "    The server is a CRITICAL component of RPAE and can not work without it!"
+    echo "    Try running the following commands:"
+    echo "    systemctl enable rpae-service"
+    echo "    systemctctl start rpae-server"
+    echo "    systemctl status rpae-server"
+    echo "    Or try running the server manually with 'rpae-server'"
+    echo -ne "\e[32m"
+    EXIT_CODE=254
+fi
+
+# remove all text formatting and move back to init directory
+echo -e "$SCRIPT_NAME: Installation complete..."
+echo ""
+echo "#################################################################"
+echo ""
+cd "$INIT_DIR"
+
+exit $EXIT_CODE

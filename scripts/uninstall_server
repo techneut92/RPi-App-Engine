@@ -1,0 +1,76 @@
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+SCRIPT_NAME="Rpae Server Uninstaller"
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$SCRIPT_DIR/../"
+INIT_DIR=$(pwd)
+
+# detect OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
+
+echo -e "\e[32m"
+echo "#################################################################"
+echo -e "# $SCRIPT_NAME\t\t\t\t\t#"
+echo "#################################################################"
+echo ""
+
+#############################################################
+# Uninstall Server 											                    #
+#############################################################
+
+if test -f "/etc/rpae/server/server.ini"; then
+	if [ -f "$ROOT_DIR/server.ini" ]; then
+		mv "$ROOT_DIR/server.ini" "$ROOT_DIR/server.ini.backup"
+    echo "$SCRIPT_NAME: Creating backup of server.ini..."
+    mv /etc/rpae/server/server.ini "$ROOT_DIR/"
+  else
+    mv /etc/rpae/server/server.ini "$ROOT_DIR/"
+  fi
+fi
+
+#check if old service is running and remove
+if [[ $(systemctl is-enabled rpae-server) == "enabled" ]]; then
+    if [[ $(systemctl is-active rpae-server) == "active" ]]; then
+        echo "$SCRIPT_NAME: Stopping rpae-server service..."
+        systemctl stop rpae-server
+    fi
+    echo "$SCRIPT_NAME: Disabling rpae-server service..."
+    systemctl disable rpae-server &> /dev/null
+else
+	echo -e "\e[33m$SCRIPT_NAME: Rpae-server service isn't enabled...\e[32m"
+fi
+
+if [ -e "/etc/systemd/system/rpae-server.service" ]; then
+    echo "$SCRIPT_NAME: Removing rpae-server.service file..."
+    rm -rf etc/systemd/system/rpae-server.service ||:
+else
+    echo -e "\e[33m$SCRIPT_NAME: Service file rpae-server.service doesn't exist...\e[32m"
+fi
+
+# move the server to /use/bin as rpae-server and remove files
+if [ -e "/usr/bin/rpae-server" ]; then
+	echo "$SCRIPT_NAME: Remove rpae-server from /usr/bin..."
+	rm -rf /usr/bin/rpae-server ||:
+else
+	echo -e "\e[33m$SCRIPT_NAME: /usr/bin/rpae-server already removed...\e[32m"
+fi
+
+echo ""
+echo "#################################################################"
+echo ""
+cd "$INIT_DIR"
+
+exit 0

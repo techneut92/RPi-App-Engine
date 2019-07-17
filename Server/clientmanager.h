@@ -2,7 +2,8 @@
 #define CLIENTMANAGER_H
 
 #include <QObject>
-#include "client.h"
+#include "serverapp.h"
+#include "webapp.h"
 #include <QMap>
 #include <msgdistributor.h>
 
@@ -16,20 +17,17 @@ public:
     QMap<int, Client*> getClients();
     QMap<QString, QList<int>> getSortedClients();
     void appendClient(Client* c);
+    bool uidTaken(int uid);
 
 private Q_SLOTS:
-    void connectApp(Client *c);
-    void onDisconnect(Client *c);
+
 
 private:
     MsgDistributor *msgDistributor;
-    QMap<int, Client*> u_clients;
-    QMap<int, Client*> cc_clients;
+    QMap<int, Client*> clients;
+    WebClientConnector *wc_connector = nullptr;
     QMap<QString, QList<int>> sorted_uids;
-    int uidCounter = 0;
 
-    int getNewUid();
-    bool uidTaken(int uid);
     QString getClientsPackage(QString id, int excluded_uid);
     QString getClientsPackage(QString id);
     void notifyOthersNewClient(Client* new_client);
@@ -41,6 +39,8 @@ private:
 signals:
 
 public slots:
+    void onDisconnect(Client *c);
+
 };
 
 #endif // CLIENTMANAGER_H

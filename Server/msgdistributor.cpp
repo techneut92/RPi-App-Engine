@@ -3,20 +3,10 @@
 #include <QMap>
 #include "clientmanager.h"
 
-MsgDistributor::MsgDistributor(QObject *parent) : QObject(parent)
-{
+MsgDistributor::MsgDistributor(QObject *parent) : QObject(parent) {}
+MsgDistributor::~MsgDistributor() {}
 
-}
-
-MsgDistributor::~MsgDistributor()
-{
-
-}
-
-void MsgDistributor::setServer(ClientManager *c)
-{
-    this->cm = c;
-}
+void MsgDistributor::setServer(ClientManager *c){ this->cm = c; }
 
 // Function to relay messages to specific client groups
 void MsgDistributor::relayMessage(Client *origin, QVariantMap jmap)
@@ -25,26 +15,26 @@ void MsgDistributor::relayMessage(Client *origin, QVariantMap jmap)
     QMap<QString, QList<int>> sorted_uids = this->cm->getSortedClients();
     if (jmap["serverTarget"].toString() == "all"){
         // iterate through all clients with the same id and send a message to all client types except the origin
-        foreach(int uid, sorted_uids[origin->getId()])
-            if (uid != origin->uid) cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
+        foreach(int uid, sorted_uids[origin->getAppID()])
+            if (uid != origin->getUID()) cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
     else if(jmap["serverTarget"].toString() == "serverApp"){
         // iterate through all clients with the same id and send a message to all server apps except the origin
-        foreach( int uid, sorted_uids[origin->getId()])
-            if (uid != origin->uid && cc_clients[uid]->appType() == AppType::Server)
+        foreach( int uid, sorted_uids[origin->getAppID()])
+            if (uid != origin->getUID() && cc_clients[uid]->getAppType() == AppType::Server)
                 cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
     else if(jmap["serverTarget"].toString() == "clientApp"){
         // iterate through all clients with the same id and send a message to all client apps except the origin
-        foreach( int uid, sorted_uids[origin->getId()])
-            if (cc_clients[uid]->uid != origin->uid && cc_clients[uid]->appType() == AppType::WebClient)
+        foreach( int uid, sorted_uids[origin->getAppID()])
+            if (cc_clients[uid]->getUID() != origin->getUID() && cc_clients[uid]->getAppType() == AppType::WebClient)
                 cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
     }
     else if(jmap["serverTarget"].toString() == "uid"){
         bool ok;
         int uid = jmap["uid"].toInt(&ok);
         if (!ok) {
-            qDebug() << "from uid:" << origin->uid << "app:" << origin->getId() <<
+            qDebug() << "from uid:" << origin->getUID() << "app:" << origin->getAppID() <<
                         "int conversion of uid failed. message not send. uid:" << jmap["uid"].toString();
         }else
             cc_clients[uid]->sendTextMessage(this->genPackage(origin, jmap["msgData"].toString()));
@@ -56,7 +46,7 @@ void MsgDistributor::relayMessage(Client *origin, QVariantMap jmap)
         if (!jmap["msgData"].isNull())
             relayMessage(jmap["msgData"].toString(), origin);
         else
-            qDebug() << "couldn't send message without target from uid: " << origin->uid;
+            qDebug() << "couldn't send message without target from uid: " << origin->getUID();
     }
 }
 
@@ -65,8 +55,8 @@ void MsgDistributor::relayMessage(QString message, Client *origin)
 {
     QMap<int, Client*> cc_clients = this->cm->getClients();
     QMap<QString, QList<int>> sorted_uids = this->cm->getSortedClients();
-    foreach( int uid, sorted_uids[origin->getId()])
-        if (cc_clients[uid]->uid != origin->uid && cc_clients[uid]->appType() != origin->appType()) {
+    foreach( int uid, sorted_uids[origin->getAppID()])
+        if (cc_clients[uid]->getUID() != origin->getUID() && cc_clients[uid]->getAppType() != origin->getAppType()) {
             cc_clients[uid]->sendTextMessage(this->genPackage(origin, message));
         }
 }
@@ -76,16 +66,16 @@ QString MsgDistributor::genPackage(Client *origin, QString msg)
     QJsonObject mainobject;
     QJsonObject originClient;
 
-    originClient.insert("uid", QJsonValue::fromVariant(origin->uid));
-    originClient.insert("appId", QJsonValue::fromVariant(origin->getId()));
+    originClient.insert("uid", QJsonValue::fromVariant(origin->getUID()));
+    originClient.insert("appId", QJsonValue::fromVariant(origin->getAppID()));
     originClient.insert("peerAddress", QJsonValue::fromVariant(origin->getPeerAddress()));
     originClient.insert("peerName", QJsonValue::fromVariant(origin->getPeerName()));
     originClient.insert("peerOrigin", QJsonValue::fromVariant(origin->getOrigin()));
-    if (origin->appType() == AppType::WebClient)
+    if (origin->getAppType() == AppType::WebClient)
         originClient.insert("appType", QJsonValue::fromVariant("webClient"));
-    else if (origin->appType() == AppType::Server)
+    else if (origin->getAppType() == AppType::Server)
         originClient.insert("appType", QJsonValue::fromVariant("serverClient"));
-    else if (origin->appType() == AppType::UnkownType)
+    else if (origin->getAppType() == AppType::UnkownType)
         originClient.insert("appType", QJsonValue::fromVariant("unknownType"));
 
     mainobject.insert("origin", originClient);
@@ -108,5 +98,10 @@ void MsgDistributor::processTextMessages(QString message, Client* origin)
     }
     else
         relayMessage(message, origin);
-        //qDebug() << "invalid message:" << message;
+    //qDebug() << "invalid message:" << message;
+}
+
+void MsgDistributor::processBinaryMessages(QByteArray message, Client *origin)
+{
+
 }

@@ -2,7 +2,7 @@
 #define MSGDISTRIBUTOR_H
 
 #include <QObject>
-#include "client.h"
+#include "serverapp.h"
 
 #define MAX_CLIENTS 100000 // max value of an int should be 2147483647. so this is fine hopefully.
 
@@ -29,6 +29,7 @@ signals:
 
 public slots:
     void processTextMessages(QString message, Client* origin);
+    void processBinaryMessages(QByteArray message, Client* origin);
 };
 
 #endif // MSGDISTRIBUTOR_H

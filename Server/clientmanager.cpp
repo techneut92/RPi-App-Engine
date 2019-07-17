@@ -7,92 +7,45 @@ ClientManager::ClientManager(MsgDistributor *md, QObject *parent) : QObject(pare
     this->msgDistributor->setServer(this);
 }
 
-QMap<int, Client *> ClientManager::getClients()
-{
-    return this->cc_clients;
-}
-
-QMap<QString, QList<int> > ClientManager::getSortedClients()
-{
-    return this->sorted_uids;
-}
+QMap<int, Client *> ClientManager::getClients() { return this->clients; }
+QMap<QString, QList<int> > ClientManager::getSortedClients() { return this->sorted_uids; }
+bool ClientManager::uidTaken(int uid) { return this->clients.keys().contains(uid); }
 
 void ClientManager::appendClient(Client *c)
 {
-    c->uid = this->getNewUid();
-    this->u_clients[c->uid] = c;
-    connect(c, &Client::handshake_succesful, this, &ClientManager::connectApp);
-    connect(c, &Client::disconnected, this, &ClientManager::onDisconnect);
-}
+    this->clients.insert(c->getUID(), c);
+    this->sorted_uids[c->getAppID()].append(c->getUID());
+    c->connectSL(this, this->msgDistributor);
 
-void ClientManager::connectApp(Client *c)
-{    
-    // add c to cc_clients and sorted uid's
-    this->cc_clients[c->uid] = c;
-    this->sorted_uids[c->getId()].append(c->uid);
-
-    // remove c from u_clients
-    this->u_clients.remove(c->uid);
-
-    // get the clients already connected
     QString clientsString;
 
-    // connect c to the msgdistributor.
-    connect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
-
-    qDebug() << "app" << c->getId() << "uid:" << c->uid << "Ready to process data";
+    qDebug() << "app" << c->getAppID() << "uid:" << c->getUID() << "Ready to process data";
     c->sendTextMessage("HANDSHAKE_SUCCESS " +
-                       this->getClientsPackage(c->uid).replace(" ", "") +
+                       this->getClientsPackage(c->getUID()).replace(" ", "") +
                        " " +
-                       this->getClientsPackage(c->getId(), c->uid).replace(" ", ""));
-    //c->sendTextMessage(this->getClientsPackage(c->getId(), c->uid));
+                       this->getClientsPackage(c->getAppID(), c->getUID()).replace(" ", ""));
     this->notifyOthersNewClient(c);
 }
 
 void ClientManager::onDisconnect(Client *c)
 {
-    disconnect(c, &Client::disconnected, this, &ClientManager::onDisconnect);
-    if (c->awaiting_handshake()){
-        qDebug() << "Client without handshake disconnected" << c->uid;
-        // remove from cc_clients
-        this->u_clients.remove(c->uid);
-    }else{
-        qDebug() << "Client Disconnected" << c->getId() << c->uid;
-        this->notifyOthersClientDisconnected(c);
-        disconnect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
-        this->cc_clients.remove(c->uid); // TODO FIX, segmentation errors??
+    //disconnect(c, &Client::disconnected, this, &ClientManager::onDisconnect);
 
-        QMutableListIterator<int> i(this->sorted_uids[c->getId()]);
-        while (i.hasNext()) {
-            if (i.next() == c->uid)
-                i.remove();
-        }
-        if (this->sorted_uids[c->getId()].count() == 0)
-            this->sorted_uids.remove(c->getId());
-        delete c;
+    qDebug() << "Client Disconnected" << c->getAppID() << c->getUID();
+    this->notifyOthersClientDisconnected(c);
+    //disconnect(c, &Client::textMessageReceived, this->msgDistributor, &MsgDistributor::processTextMessages);
+    this->clients.remove(c->getUID()); // TODO FIX, segmentation errors??
+
+    QMutableListIterator<int> i(this->sorted_uids[c->getAppID()]);
+    while (i.hasNext()) {
+        if (i.next() == c->getUID())
+            i.remove();
     }
+    if (this->sorted_uids[c->getAppID()].count() == 0)
+        this->sorted_uids.remove(c->getAppID());
+    delete c;
 }
 
-int ClientManager::getNewUid()
-{
-    int counter = 0;
-    while (this->uidTaken(this->uidCounter)){
-        this->uidCounter++;
-        if (this->uidCounter > MAX_CLIENTS) this->uidCounter = 0;
-        if (counter >= MAX_CLIENTS){
-            qDebug() << "FATAL ERROR!: more then" << MAX_CLIENTS << "clients are connected already. exiting";
-            exit(255);
-        }
-    }
-    int uid = this->uidCounter;
-    this->uidCounter++;
-    return uid;
-}
-
-bool ClientManager::uidTaken(int uid)
-{
-    return this->cc_clients.keys().contains(uid) || this->u_clients.contains(uid);
-}
 
 QString ClientManager::getClientsPackage(QString id, int excluded_uid)
 {
@@ -103,7 +56,7 @@ QString ClientManager::getClientsPackage(QString id, int excluded_uid)
 
     foreach(int uid, this->sorted_uids[id])
         if (excluded_uid < 0 || (excluded_uid >= 0 && excluded_uid != uid))
-            clientsArray.push_back(this->getClientJsonObject(this->cc_clients[uid]));
+            clientsArray.push_back(this->getClientJsonObject(this->clients[uid]));
     mainObject.insert("clients", clientsArray);
 
     QJsonDocument  json(mainObject);
@@ -116,7 +69,7 @@ QString ClientManager::getClientsPackage(int uid)
     QJsonObject  mainObject;
 
     mainObject.insert("action", QJsonValue::fromVariant("initSelf"));
-    mainObject.insert("self", this->getClientJsonObject(this->cc_clients[uid]));
+    mainObject.insert("self", this->getClientJsonObject(this->clients[uid]));
 
     QJsonDocument  json(mainObject);
     QString jsonString = json.toJson();
@@ -138,9 +91,9 @@ void ClientManager::notifyOthersNewClient(Client *new_client)
     QJsonDocument json(mainObject);
     QString jsonString = json.toJson();
     QString msg = this->genPackage(jsonString);
-    foreach (int target, this->sorted_uids[new_client->getId()])
-        if (new_client->uid != target)
-            this->cc_clients[target]->sendTextMessage(msg);
+    foreach (int target, this->sorted_uids[new_client->getAppID()])
+        if (new_client->getUID() != target)
+            this->clients[target]->sendTextMessage(msg);
 }
 
 void ClientManager::notifyOthersClientDisconnected(Client *c)
@@ -149,14 +102,14 @@ void ClientManager::notifyOthersClientDisconnected(Client *c)
     QJsonArray clientsArray;
 
     mainObject.insert("action", QJsonValue::fromVariant("clientDisconnected"));
-    mainObject.insert("clientUid", c->uid);
+    mainObject.insert("clientUid", c->getUID());
 
     QJsonDocument json(mainObject);
     QString jsonString = json.toJson();
     QString msg = this->genPackage(jsonString);
-    foreach (int target, this->sorted_uids[c->getId()])
-        if (c->uid != target)
-            this->cc_clients[target]->sendTextMessage(msg);
+    foreach (int target, this->sorted_uids[c->getAppID()])
+        if (c->getUID() != target)
+            this->clients[target]->sendTextMessage(msg);
 }
 
 QString ClientManager::genPackage(QString message)
@@ -174,13 +127,13 @@ QString ClientManager::genPackage(QString message)
 QJsonObject ClientManager::getClientJsonObject(Client *c)
 {
     QJsonObject t_object;
-    t_object.insert("uid", QJsonValue::fromVariant(c->uid));
-    t_object.insert("appId", QJsonValue::fromVariant(c->getId()));
+    t_object.insert("uid", QJsonValue::fromVariant(c->getUID()));
+    t_object.insert("appId", QJsonValue::fromVariant(c->getAppID()));
     t_object.insert("peerName", QJsonValue::fromVariant(c->getPeerName()));
     t_object.insert("peerAddress", QJsonValue::fromVariant(c->getPeerAddress()));
     t_object.insert("peerOrigin", QJsonValue::fromVariant(c->getOrigin()));
-    if (c->appType() == AppType::Server) t_object.insert("appType", QJsonValue::fromVariant("serverApp"));
-    else if(c->appType() == AppType::WebClient) t_object.insert("appType", QJsonValue::fromVariant("clientApp"));
-    else if(c->appType() == AppType::UnkownType) t_object.insert("appType", QJsonValue::fromVariant("unkownType"));
+    if (c->getAppType() == AppType::Server) t_object.insert("appType", QJsonValue::fromVariant("serverApp"));
+    else if(c->getAppType() == AppType::WebClient) t_object.insert("appType", QJsonValue::fromVariant("clientApp"));
+    else if(c->getAppType() == AppType::UnkownType) t_object.insert("appType", QJsonValue::fromVariant("unkownType"));
     return t_object;
 }

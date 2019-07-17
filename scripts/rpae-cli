@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+import sys
+import os
+import subprocess
+
+def get_var_from_file(varname):
+    CMD = 'echo $(source /etc/rpae/version; echo $%s)' % varname
+    p = subprocess.Popen(CMD, stdout=subprocess.PIPE, shell=True, executable='/bin/bash')
+    return p.stdout.readlines()[0].strip().decode("utf-8")
+
+def print_help():
+	print("--version\t[-v]")
+	print("\tPrints the versions of all components installed.")
+	print("")
+	print("--rpae-version")
+	print("\tPrints the version of rpae.")
+	print("")
+	print("--server-version")
+	print("\tPrints the version of the server.")
+	print("")
+	print("--webclient-version")
+	print("\tPrints the version of the webclient.")
+	print("")
+	print("--pylib-version")
+	print("\tPPrints the version of the python library's.")
+	print("")
+	print("--cli-version")
+	print("\tPrints the version of this cli.")
+	print("")	
+
+if not os.path.exists('/etc/rpae/version'):
+	print("Rpae is not installed.")
+	exit(255)
+elif len(sys.argv) <= 1:
+	print("No arguments given.")
+	exit(255)
+else:
+	rpae_version = get_var_from_file('RPAE_VERSION')
+	rpae_server_version = get_var_from_file('RPAE_SERVER_VERSION')
+	rpae_webclient_version = get_var_from_file('RPAE_WEBCLIENT_VERSION')
+	rpae_cli_version = get_var_from_file('RPAE_CLI_VERSION')
+	rpae_lib_version = get_var_from_file('RPAE_LIB_VERSION')
+
+if sys.argv[1] == '--help' or sys.argv[1] == '-h':
+	print_help()
+elif sys.argv[1] == '--version' or sys.argv[1] == '-v':
+	print("rpae:", rpae_version)
+	print("server:", rpae_server_version)
+	print("webclient:", rpae_webclient_version)
+	print("Python libs:", rpae_lib_version)
+	print("cli:", rpae_cli_version)
+elif sys.argv[1] == '--rpae-version':
+	print(rpae_version)
+elif sys.argv[1] == '--server-version':
+	print(rpae_server_version)
+elif sys.argv[1] == '--webclient-version':
+	print(rpae_webclient_version)
+elif sys.argv[1] == '--pylib-version':
+	print(rpae_lib_version)
+elif sys.argv[1] == '--cli-version':
+	print(rpae_cli_version)
+else:
+	print("invalid argument:", sys.argv[1])

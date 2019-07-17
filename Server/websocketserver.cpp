@@ -7,6 +7,10 @@
 #include <QSettings>
 #include <QDebug>
 #include "clientmanager.h"
+#include "jsonhandler.h"
+#include "wc_connector.h"
+#include "serverapp.h"
+#include "webapp.h"
 
 WebsocketServer::WebsocketServer(ClientManager *cm, QObject *parent) :
     QObject(parent),
@@ -69,11 +73,85 @@ void WebsocketServer::onNewConnection()
 
     qDebug() << "Client connected:" << pSocket->peerAddress().toString() << pSocket->origin();
 
-    this->cm->appendClient(new Client(pSocket));
+    this->appendClient(pSocket);
+
+    //this->cm->appendClient(new ServerApp(pSocket));
 }
 
 void WebsocketServer::onSslErrors(const QList<QSslError> &errors)
 {
     qDebug() << "SSL error occured";
     Q_UNUSED(errors)
+}
+
+void WebsocketServer::identify(QString message)
+{
+    // convert json to qvariantmap
+    if (jsonHandler::isValidJson(message)) {
+        QVariantMap jsonMap = jsonHandler::jsonStringToQMap(message);
+        if (!jsonMap.isEmpty() && !jsonMap["appID"].isNull() && !jsonMap["uid"].isNull()
+                && !jsonMap["appType"].isNull()){// process handshake data
+            int uid = jsonMap["uid"].toInt();
+            QString id = jsonMap["id"].toString();
+            QString location = jsonMap["location"].toString();
+            AppType app_type;
+            QWebSocket *socket = this->unidentified_clients.value(uid);
+            qDebug() << "Handshake started for uid:" << uid;
+            Client *app;
+            if (jsonMap["appType"].toString() == "clientApp") {
+                app_type = AppType::WebClient;
+                app = new WebApp(this->wc_connector, uid, id, location, app_type);
+                this->cm->appendClient(app);
+            }
+            else if (jsonMap["appType"].toString() == "serverApp") {
+                app_type = AppType::Server;
+                app = new ServerApp(socket, uid, id, location, app_type);
+                this->cm->appendClient(app);
+            }
+            else if (jsonMap["appType"].toString() == "webClientConnector") {
+                app_type = AppType::WCConnector;
+                WebClientConnector *app = new WebClientConnector(socket, uid, id, location, app_type);
+                this->wc_connector = app;
+                this->cm->appendClient(app);
+            }
+        }else{
+            //this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message);
+        }
+    }else{
+        //this->ws_client->sendTextMessage("HANDSHAKE_FAILURE: incorrect data: " + message); // TODO add error
+    }
+}
+
+void WebsocketServer::falseIdentify(QByteArray message)
+{
+    this->identify(QString::fromStdString(message.toStdString()));
+}
+
+int WebsocketServer::getNewUid()
+{
+    int counter = 0;
+    while (this->uidTaken(this->uidCounter)){
+        this->uidCounter++;
+        if (this->uidCounter > MAX_CLIENTS) this->uidCounter = 0;
+        if (counter >= MAX_CLIENTS){
+            qDebug() << "FATAL ERROR!: more then" << MAX_CLIENTS << "clients are connected already. exiting";
+        }
+    }
+    int uid = this->uidCounter;
+    this->uidCounter++;
+    return uid;
+}
+
+bool WebsocketServer::uidTaken(int uid)
+{
+    return this->cm->uidTaken(uid) || this->unidentified_clients.contains(uid);
+}
+
+void WebsocketServer::appendClient(QWebSocket *socket)
+{
+    connect(socket, &QWebSocket::textMessageReceived, this, &WebsocketServer::identify);
+    connect(socket, &QWebSocket::binaryMessageReceived, this, &WebsocketServer::falseIdentify);
+    int uid = this->getNewUid();
+    this->unidentified_clients[uid] = socket;
+    socket->sendTextMessage("HANDSHAKE " + QString::number(uid));
 }

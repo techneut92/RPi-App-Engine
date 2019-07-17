@@ -1,0 +1,70 @@
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+SCRIPT_NAME="Rpae Uninstall Tool"
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$SCRIPT_DIR/../"
+INIT_DIR=$(pwd)
+
+# detect OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
+
+echo -e "\e[32m"
+echo "#################################################################"
+echo -e "# $SCRIPT_NAME\t\t\t\t\t\t#"
+echo "#################################################################"
+echo ""
+
+# remove server
+echo "$SCRIPT_NAME: Starting server uninstaller..."
+$SCRIPT_DIR/uninstall_server
+
+# Remove webclient
+echo "$SCRIPT_NAME: Removing Webclient..."
+rm -rf /var/www/html/*
+
+uninstall_python_libs() {
+    if [ -d "/usr/local/lib/python$1" ]; then
+        RPLIBS=/usr/local/lib/python$1/dist-packages/RPAE
+        if [ -d "$RPLIBS" ]; then
+            echo "$SCRIPT_NAME: Removing python$1 rpae library's..."
+            #mkdir -p "$SCRIPT_DIR/backups/1/server libs/$1"
+	    	#mv /usr/local/lib/python$1/dist-packages/RPAE "$SCRIPT_DIR/backups/1/server libs/$1/"
+	    	rm -rf /usr/local/lib/python$1/dist-packages/RPAE
+        fi
+    fi
+}
+uninstall_python_libs "3.3"
+uninstall_python_libs "3.4"
+uninstall_python_libs "3.5"
+uninstall_python_libs "3.6"
+uninstall_python_libs "3.7"
+uninstall_python_libs "3.8"
+
+#############################################################
+# uninstall rpae-cli										#
+#############################################################
+echo "$SCRIPT_NAME: Removing rpae-cli..."
+rm /usr/bin/rpae-cli
+
+#############################################################
+# remove folders 											#
+#############################################################
+rm -rf /etc/rpae/version
+
+echo "$SCRIPT_NAME: Uninstall complete..."
+echo ""
+echo "#################################################################"
+echo ""

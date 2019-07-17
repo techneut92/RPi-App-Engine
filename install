@@ -1,0 +1,237 @@
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+SCRIPT_NAME="Raspberry Pi App Engine Installer"
+ERRORS=false
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR=$SCRIPT_DIR
+INIT_DIR=$(pwd)
+. "$ROOT_DIR/version"
+chmod +x "$SCRIPT_DIR/scripts/"*
+
+# check if /var/rpae/installed_versions exists and /usr/bin/cli, if yes expect a full rpae installation
+PREV_INSTALL=false
+PREV_VERSION=false
+. "$ROOT_DIR/"version
+if [ -f "/etc/rpae/installed_versions" ] && [ -e "/usr/bin/rpae-cli" ]; then
+    PREV_INSTALL=true
+    PREV_VERSION="$(/usr/bin/rpae-cli --rpae-version)"
+fi
+
+# detect OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
+
+#################################################################
+# Intro 														#
+#################################################################
+echo -e "\e[32m"
+echo "#################################################################"
+echo -e "# $SCRIPT_NAME\t\t\t\t#"
+echo "#################################################################"
+echo ""
+echo "Raspberry pi app engine versions:"
+echo -e "rpae: $RPAE_VERSION\t\tserver: $RPAE_SERVER_VERSION"
+echo -e "webclient: $RPAE_WEBCLIENT_VERSION\t\tPython lib: $RPAE_LIB_VERSION"
+echo "cli: $RPAE_CLI_VERSION"
+echo ""
+echo "System information:"
+echo -e "OS: $NAME $VERSION"
+echo -e "Kernel: $(uname -r)"
+echo -e "$(qmake --version)"
+echo -e "Default python: $(python3 --version)"
+echo ""
+if [ PREV_INSTALL == true ]; then
+	echo "Detected rpae is already installed."
+	echo "This script will not remove previous versions."
+	echo ""
+fi
+echo "#################################################################"
+echo ""
+
+#########################################################
+# ask for overwriting 									#
+#########################################################
+REINSTALL=false
+if [ "$PREV_VERSION" == "$RPAE_VERSION" ] && [ $PREV_INSTALL == true ] ; then
+	echo "Rpae with the same version is already installed."
+	echo -e "$(/usr/bin/rpae-cli --version)"
+	while true; do
+		read -p "Do you want to reinstall rpae? [y/n] " yn
+		case $yn in 
+			[Yy]* ) REINSTALL=true; break;;
+			[Nn]* ) echo "Aborting..."; exit 255;;
+			* ) echo "Please answer y (for yes) or n (for no)";;
+		esac
+	done
+fi
+
+sleep 3
+
+#########################################################
+# uninstall previous version 							#
+#########################################################
+if [ $PREV_INSTALL == true ]; then
+	echo "$SCRIPT_NAME: Start uninstaller for rpae-$PREV_VERSION..."
+	"/opt/rpae-$PREV_VERSION/scripts/uninstall"
+fi
+
+#########################################################
+# Install depency's 									#
+#########################################################
+echo "$SCRIPT_NAME: running apt-get update..."
+apt-get update > /dev/null
+
+#check which OS and install packages accordingly
+if [ "$OS" == "Ubuntu" ] && [ "$VER" == "19.04" ]; then
+    apt-get install -y apache2 php7.2 qt5-default libqt5websockets5 \
+    libqt5websockets5-dev python3 python3-pip mplayer libasound2-dev \
+    gcc python3-dev qt5-qmake unclutter &> /dev/null &
+else
+    apt-get install -y apache2 php7 mplayer libasound2-dev gcc \
+    python3-dev apache2 qt5-qmake qt5-default \
+    libqt5websockets5 libqt5websockets5-dev python3 unclutter &> /dev/null &
+fi
+pid=$!
+trap "kill $pid 2> /dev/null" EXIT
+while kill -0 $pid &> /dev/null
+do
+    echo -ne "$SCRIPT_NAME: Installing depency's.  \r"
+    sleep 1
+    echo -ne "$SCRIPT_NAME: Installing depency's.. \r"
+    sleep 1
+    echo -ne "$SCRIPT_NAME: Installing depency's...\r"
+    sleep 1
+done
+echo "$SCRIPT_NAME: Installing depency's done"
+
+echo "$SCRIPT_NAME: Installing Python depency's..."
+python3 -m pip install --upgrade pip &> /dev/null
+python3 -m pip install websocket_client &> /dev/null
+python3 -m pip install pyalsaaudio &> /dev/null
+
+#########################################################
+# Move new installation to /opt							#
+#########################################################
+INSTALL_DIR="/opt/rpae-$RPAE_VERSION"
+echo "$SCRIPT_NAME: Creating $INSTALL_DIR..."
+if [ -d "$INSTALL_DIR" ] && [ $REINSTALL == true ]; then
+	rm -rf "$INSTALL_DIR"
+elif [ -d "$INSTALL_DIR" ]; then
+	echo "$SCRIPT_NAME: $INSTALL_DIR already exists..."
+	echo -e "\tPlease remove $INSTALL_DIR first and then restart the installation."
+	exit 255
+fi
+echo "$SCRIPT_NAME: Moving rpae to $INSTALL_DIR..."
+mkdir -p "$INSTALL_DIR"
+cp -ar "$ROOT_DIR/"* "$INSTALL_DIR"
+cd $INSTALL_DIR
+
+#########################################################
+# create folders 										#
+#########################################################
+echo "$SCRIPT_NAME: Creating folders..."
+#mkdir -p "/var/rpae"
+mkdir -p "/etc/rpae/server"
+
+#########################################################
+# Server installer  									#
+#########################################################
+echo "$SCRIPT_NAME: Starting rpae server installer..."
+"$INSTALL_DIR/scripts/install_server"
+RETURN_VAL=$?
+if [ $RETURN_VAL -eq 255 ]; then
+    echo -e "\e[31m$SCRIPT_NAME: CRITICAL ERROR: Installing rpae server failed...\e[32m"
+    ERRORS=true
+    #echo "SERVER=false" >> "$SCRIPT_DIR/scripts/install_info"
+elif [ $RETURN_VAL -eq 254 ]; then
+    echo -e "\e[91m$SCRIPT_NAME: CRITICAL ERROR: Installing rpae server failed..."
+    echo -ne "\e[32m"
+    ERRORS=true
+    #echo "SERVER=false" >> "$SCRIPT_DIR/scripts/install_info"
+#else
+    #echo "SERVER=true" >> "$SCRIPT_DIR/scripts/install_info"
+fi
+
+#########################################################
+# install webclient 									#
+#########################################################
+# TODO BACKUP APPS LATER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#echo "$SCRIPT_NAME: Removing Webclient..."
+rm -rf /var/www/html/*
+
+echo "$SCRIPT_NAME: Installing new webclient..."
+cp -ar "$INSTALL_DIR"/Webclient/* /var/www/html/
+chown -R www-data:www-data /var/www/*
+
+#########################################################
+# Install server library's 								#
+#########################################################
+# function that accepts python version in $1 and then installs the libs there
+install_python_libs() {
+    if [ -d "/usr/local/lib/python$1" ]; then
+        RPLIBS=/usr/local/lib/python$1/dist-packages/RPAE
+        if [ -d "$RPLIBS" ]; then
+            #echo "$SCRIPT_NAME: Backing up old python$1 library's..."
+            #mkdir -p "$SCRIPT_DIR/backups/1/server libs/$1"
+	    	#mv /usr/local/lib/python$1/dist-packages/RPAE "$SCRIPT_DIR/backups/1/server libs/$1/"
+	    	rm -rf /usr/local/lib/python$1/dist-packages/RPAE
+        fi
+        echo "$SCRIPT_NAME: Installing python$1 libraries..."
+        cp -ar "$INSTALL_DIR/Server libs/RPAE" "/usr/local/lib/python$1/dist-packages/"
+    fi
+}
+# install python libs
+install_python_libs "3.3"
+install_python_libs "3.4"
+install_python_libs "3.5"
+install_python_libs "3.6"
+install_python_libs "3.7"
+install_python_libs "3.8"
+
+#####################################################
+# Install cli 										#
+#####################################################
+if [ -e /usr/bin/rpae-cli ]; then
+	echo -e "\e[33m$SCRIPT_NAME: Removing /usr/bin/rpae-cli...\e[32m"
+	rm /usr/bin/rpae-cli
+fi
+echo "$SCRIPT_NAME: Installing rpae-cli..."
+ln -s "$INSTALL_DIR/scripts/rpae-cli" /usr/bin/rpae-cli
+
+
+#####################################################
+# link version files								#
+#####################################################
+echo "$SCRIPT_NAME: Finishing up..."
+cp "$INSTALL_DIR/version" /etc/rpae/version
+chmod -R 775 /etc/rpae/*
+if [ ! -f /etc/rpae/installed_versions ]; then
+	touch /etc/rpae/installed_versions
+fi
+if ! grep -Fxq "$RPAE_VERSION" /etc/rpae/installed_versions
+then
+	echo "$RPAE_VERSION" >> /etc/rpae/installed_versions
+fi
+
+
+if [ $ERRORS == true ]; then
+    echo -ne "\e[91m"
+    echo "$SCRIPT_NAME: Installation ended with errors..."
+    echo "    Scroll up for more info."
+else
+    echo "$SCRIPT_NAME: Installation completed successfully!..."
+fi
+echo -e "\e[0m"

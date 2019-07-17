@@ -21,6 +21,9 @@ SOURCES += \
         jsonhandler.cpp \
         main.cpp \
         msgdistributor.cpp \
+        serverapp.cpp \
+        wc_connector.cpp \
+        webapp.cpp \
         websocketserver.cpp
 
 # Default rules for deployment.
@@ -33,9 +36,13 @@ HEADERS += \
     clientmanager.h \
     jsonhandler.h \
     msgdistributor.h \
+    serverapp.h \
+    wc_connector.h \
+    webapp.h \
     websocketserver.h
 
 DISTFILES += \
     doc \
     server.ini \
-    todo
+    todo \
+    install.sh
